@@ -1,56 +1,48 @@
 # halfagiraf Modules
 
-Five instruments, processors, and modulation sources for VCV Rack 2 by halfagiraf.
-
-| Module | Purpose | Manual |
-| --- | --- | --- |
-| **Bad Sector** | Stereo buffer corruption and beat-locked broken playback | [Read the manual](docs/BadSector.md) |
-| **MOD1** | Three-channel smooth or stepped random CV | [Read the manual](docs/MOD1.md) |
-| **Entwine** | 16-voice autoregressive generative synthesizer | [Read the manual](docs/Entwine.md) |
-| **Constellate** | Four-channel relational event memory | [Read the manual](docs/Constellate.md) |
-| **Palimpsest** | Stereo spectral-memory instrument | [Read the manual](docs/Palimpsest.md) |
+VCV Rack 2 modules by halfagiraf.
 
 ## Modules
 
-### Bad Sector
+### [Bad Sector](docs/BadSector.md)
 
 <p align="center"><img src="docs/badsector.png" width="360" alt="Bad Sector in VCV Rack"/></p>
 
-Records a beat-aligned stereo buffer and transforms it through synchronized Bend, Break, and Corrupt processes. Its timing grid remains locked while repeats, playback speed, direction, and traversal change.
+A stereo buffer-corruption effect for broken, repeating and degraded playback. Bend, Break and Corrupt can be clocked to the same timing grid.
 
 [![Bad Sector ambient demo over London](https://i.ytimg.com/vi/EV3uuw9fdKU/hqdefault.jpg)](https://www.youtube.com/watch?v=EV3uuw9fdKU)
 
-### MOD1
+### [MOD1](docs/MOD1.md)
 
 <p align="center"><img src="docs/MOD1-in-VCV-Rack.png" width="150" alt="MOD1 in VCV Rack"/></p>
 
-Produces three independently scaled bipolar random voltages with smooth interpolation or stepped sample-and-hold motion, driven by its internal clock or an external clock.
+Three bipolar random-voltage outputs with smooth and sample-and-hold modes. It runs from its own clock or an external one.
 
-### Entwine
+### [Entwine](docs/Entwine.md)
 
 <p align="center"><img src="docs/Entwine-in-VCV-Rack.png" width="300" alt="Entwine in VCV Rack"/></p>
 
-Generates interlaced Pulsar and Quasar voice streams whose pitch and duration recursively influence their next values. It can run autonomously, synchronize to a clock, or control other voices through V/Oct and gates.
+A 16-voice autoregressive synthesizer built around two interlaced streams, Pulsar and Quasar. It can free-run, follow a clock, or send V/Oct and gates to other voices.
 
-### Constellate
+### [Constellate](docs/Constellate.md)
 
 <p align="center"><img src="docs/Constellate.png" width="300" alt="Constellate in VCV Rack"/></p>
 
-Learns relationships between four trigger streams and produces coherent variations from that event history. Its display, transition paths, and THREAD output are driven by the actual learned model.
+Learns the relationships between four trigger streams, then uses that memory to produce related variations. THREAD outputs the confidence of each generated choice as CV.
 
 [Watch the 15-second Constellate demo](docs/Constellate-demo.mp4)
 
-### Palimpsest
+### [Palimpsest](docs/Palimpsest.md)
 
 <p align="center"><img src="docs/Palimpsest.png" width="280" alt="Palimpsest in VCV Rack"/></p>
 
-Continuously analyzes stereo input into four progressively older spectral layers, then resynthesizes that memory as an evolving, pitch-responsive ambient voice.
+A stereo spectral-memory instrument. Incoming sound passes through four ageing spectral layers and returns as an evolving, pitch-responsive voice.
 
-## Installation
+## Install
 
-The preferred installation method is the official VCV Library. Until review is complete, download the `.vcvplugin` matching your computer from the [latest GitHub release](https://github.com/stevenmcsorley/halfagiraf-modules/releases/latest), place it in Rack's matching `plugins-<OS>-<CPU>` folder, and restart Rack.
+The plugin is being reviewed for the VCV Library. In the meantime, platform builds are available from [GitHub Releases](https://github.com/stevenmcsorley/halfagiraf-modules/releases/latest).
 
-## Building and testing
+## Build
 
 With the VCV Rack SDK in the adjacent `Rack-SDK` directory:
 
@@ -60,13 +52,6 @@ make -j4
 make dist
 ```
 
-The deterministic test suite covers Bad Sector's clocking, repeat grid, selector, control laws, mix, signal safety, and display telemetry as well as the Constellate and Palimpsest engines.
+## License
 
-## Identity and license
-
-- Plugin slug: `halfagiraf-modules`
-- Plugin name: `halfagiraf Modules`
-- Module slugs: `BadSector`, `MOD1-RandomCV`, `Entwine`, `Constellate`, `Palimpsest`
-- License: GPL-3.0-or-later
-
-Panel artwork © halfagiraf. See the individual module manuals for attribution and implementation details.
+GPL-3.0-or-later. Panel artwork © halfagiraf. Attribution notes are included in the module manuals.
