@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="8mm" height="8mm" viewBox="0 0 8 8">
+  <defs>
+    <linearGradient id="bezel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#36383a"/>
+      <stop offset="0.45" stop-color="#08090b"/>
+      <stop offset="1" stop-color="#1b1d20"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#232527"/>
+      <stop offset="1" stop-color="#0e0f11"/>
+    </linearGradient>
+  </defs>
+  <rect x="0.12" y="0.12" width="7.76" height="7.76" rx="1.05" fill="#050607" stroke="#050506" stroke-width="0.24"/>
+  <rect x="0.52" y="0.52" width="6.96" height="6.96" rx="0.86" fill="url(#bezel)" stroke="#4c4d4f" stroke-width="0.18"/>
+  <rect x="1.62" y="1.62" width="4.76" height="4.76" rx="0.48" fill="url(#cap)" stroke="#08090a" stroke-width="0.2"/>
+</svg>

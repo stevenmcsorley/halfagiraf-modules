@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20.32mm" height="128.5mm" viewBox="0 0 20.32 128.5">
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#191b20"/>
+      <stop offset="1" stop-color="#0f1014"/>
+    </linearGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7fc241" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#7fc241" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7fc241" stop-opacity="0"/>
+    </linearGradient>
+    <style>
+      .name { fill:#f3f4f7; font-family:'DejaVu Sans','Arial',sans-serif; font-size:4.4px; font-weight:700; letter-spacing:0.8px; text-anchor:middle; }
+      .lbl  { fill:#dfe3ea; font-family:'DejaVu Sans','Arial',sans-serif; font-size:2.4px; font-weight:700; text-anchor:middle; letter-spacing:0.2px; }
+      .sml  { fill:#949cab; font-family:'DejaVu Sans','Arial',sans-serif; font-size:2.0px; font-weight:600; text-anchor:middle; }
+      .jck  { fill:#7fc241; font-family:'DejaVu Sans','Arial',sans-serif; font-size:2.4px; font-weight:700; text-anchor:middle; }
+      .jin  { fill:#949cab; font-family:'DejaVu Sans','Arial',sans-serif; font-size:2.4px; font-weight:700; text-anchor:middle; }
+      .tny  { fill:#6c7480; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.6px; font-weight:600; text-anchor:middle; }
+      .brand{ fill:#8c93a1; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.7px; font-weight:700; letter-spacing:0.35px; text-anchor:middle; }
+    </style>
+  </defs>
+
+  <rect width="20.32" height="128.5" fill="url(#bg1)"/>
+  <rect x="0.4" y="0.4" width="19.52" height="127.7" fill="none" stroke="#2b2e36" stroke-width="0.3"/>
+
+  <g stroke="#7fc241" stroke-width="0.3" fill="none" opacity="0.3">
+    <path d="M3,26 H6 V42 H3"/>
+    <path d="M17,46 H14 V62 H17"/>
+    <path d="M3,66 H6 V80"/>
+    <circle cx="3" cy="26" r="0.5" fill="#7fc241" stroke="none"/>
+    <circle cx="17" cy="46" r="0.5" fill="#7fc241" stroke="none"/>
+  </g>
+
+  <text class="name" x="10.16" y="9">MOD1</text>
+  <rect x="3" y="10.6" width="14.32" height="0.3" fill="url(#rule)"/>
+
+  <text class="sml" x="15.6" y="20">S&amp;H</text>
+
+  <text class="lbl" x="10.16" y="40">POT1</text>
+  <text class="lbl" x="10.16" y="58">POT2</text>
+  <text class="lbl" x="10.16" y="76">POT3</text>
+
+  <!-- F1 is input-only on the hardware (A3/D17, no PWM); F2/F3/F4 are the PWM outputs. -->
+  <text class="jin" x="6.2"  y="109">CLK</text>
+  <text class="tny" x="6.2"  y="111.2">F1 in</text>
+  <text class="jck" x="14.1" y="109">CV1</text>
+  <text class="tny" x="14.1" y="111.2">F2</text>
+  <text class="jck" x="6.2"  y="122">CV2</text>
+  <text class="tny" x="6.2"  y="124.2">F3</text>
+  <text class="jck" x="14.1" y="122">CV3</text>
+  <text class="tny" x="14.1" y="124.2">F4</text>
+
+  <!-- no arc mark at 4HP: the jack labels need the room -->
+  <text class="brand" x="10.16" y="127.4">halfagiraf</text>
+</svg>

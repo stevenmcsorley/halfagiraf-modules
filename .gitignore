@@ -1,0 +1,10 @@
+/build/
+/dist/
+/.rack-screenshot-user/
+/output/
+*.dll
+*.dylib
+*.so
+*.vcvplugin
+*.exe
+.DS_Store

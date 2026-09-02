@@ -1,0 +1,82 @@
+{
+  "plugin": "halfagiraf-modules",
+  "model": "BadSector",
+  "version": "2.0.0",
+  "params": [
+    {
+      "id": 0,
+      "value": 0.68
+    },
+    {
+      "id": 1,
+      "value": 0.0
+    },
+    {
+      "id": 2,
+      "value": 0.5
+    },
+    {
+      "id": 3,
+      "value": 0.28
+    },
+    {
+      "id": 4,
+      "value": 1.0
+    },
+    {
+      "id": 5,
+      "value": 0.5
+    },
+    {
+      "id": 6,
+      "value": 0.0
+    },
+    {
+      "id": 7,
+      "value": 0.0
+    },
+    {
+      "id": 8,
+      "value": 0.0
+    },
+    {
+      "id": 9,
+      "value": 0.0
+    },
+    {
+      "id": 10,
+      "value": 0.0
+    }
+  ],
+  "data": {
+    "macro": true,
+    "frozen": false,
+    "bendOn": true,
+    "breakOn": true,
+    "microRev": false,
+    "microSilence": false,
+    "extClock": false,
+    "stereoUnique": true,
+    "corruptSel": 0,
+    "windowing": 1.0,
+    "stereoWidth": 1.0,
+    "ledBrightness": 1.0,
+    "gatesMomentary": false,
+    "freezeMomentary": false,
+    "originalCorruptOnly": false,
+    "microInMacro": false,
+    "controlLawVersion": 1,
+    "damageVals": [
+      0.28,
+      0.0,
+      0.0
+    ],
+    "cvAmtVals": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "damageSel": 0,
+    "cvAmtSel": 0
+  }
+}

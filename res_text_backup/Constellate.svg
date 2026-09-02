@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="76.2mm" height="128.5mm" viewBox="0 0 76.2 128.5">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#292b2d"/>
+      <stop offset="0.08" stop-color="#1d1f21"/>
+      <stop offset="0.58" stop-color="#111315"/>
+      <stop offset="1" stop-color="#181a1c"/>
+    </linearGradient>
+    <linearGradient id="gold-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e4ae55" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#e4ae55" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#e4ae55" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="surface" cx="0.5" cy="0.18" r="0.86">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.055"/>
+      <stop offset="0.46" stop-color="#ffffff" stop-opacity="0.012"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.34"/>
+    </radialGradient>
+    <radialGradient id="display-glow" cx="0.5" cy="0.48" r="0.7">
+      <stop offset="0" stop-color="#172536" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#020407" stop-opacity="0"/>
+    </radialGradient>
+    <style>
+      .name { fill:#edc27b; font-family:'DejaVu Sans','Arial',sans-serif; font-size:4.35px; font-weight:400; letter-spacing:0.72px; text-anchor:middle; }
+      .tag { fill:#e0aa50; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.38px; font-weight:600; letter-spacing:0.55px; text-anchor:middle; }
+      .label { fill:#e7b866; font-family:'DejaVu Sans','Arial',sans-serif; font-size:2.03px; font-weight:400; letter-spacing:0.25px; text-anchor:middle; }
+      .small { fill:#dfb56d; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.5px; font-weight:400; letter-spacing:0.15px; text-anchor:middle; }
+      .control-label { fill:#e6b762; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.68px; font-weight:600; letter-spacing:0.11px; text-anchor:middle; }
+      .port-label { fill:#efc77e; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.78px; font-weight:600; letter-spacing:0.08px; text-anchor:middle; }
+      .amber { fill:#e2ad55; }
+      .brand { fill:#d9a858; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.58px; font-weight:400; letter-spacing:0.88px; text-anchor:middle; }
+    </style>
+  </defs>
+
+  <rect width="76.2" height="128.5" fill="url(#panel)"/>
+  <rect width="76.2" height="128.5" fill="url(#surface)"/>
+  <path d="M1 2 H75.2 M1 4 H75.2 M1 6 H75.2 M1 8 H75.2 M1 10 H75.2 M1 12 H75.2 M1 14 H75.2 M1 16 H75.2 M1 18 H75.2 M1 20 H75.2 M1 22 H75.2 M1 24 H75.2 M1 26 H75.2 M1 28 H75.2 M1 30 H75.2 M1 32 H75.2 M1 34 H75.2 M1 36 H75.2 M1 38 H75.2 M1 40 H75.2 M1 42 H75.2 M1 44 H75.2 M1 46 H75.2 M1 48 H75.2 M1 50 H75.2 M1 52 H75.2 M1 54 H75.2 M1 56 H75.2 M1 58 H75.2 M1 60 H75.2 M1 62 H75.2 M1 64 H75.2 M1 66 H75.2 M1 68 H75.2 M1 70 H75.2 M1 72 H75.2 M1 74 H75.2 M1 76 H75.2 M1 78 H75.2 M1 80 H75.2 M1 82 H75.2 M1 84 H75.2 M1 86 H75.2 M1 88 H75.2 M1 90 H75.2 M1 92 H75.2 M1 94 H75.2 M1 96 H75.2 M1 98 H75.2 M1 100 H75.2 M1 102 H75.2 M1 104 H75.2 M1 106 H75.2 M1 108 H75.2 M1 110 H75.2 M1 112 H75.2 M1 114 H75.2 M1 116 H75.2 M1 118 H75.2 M1 120 H75.2 M1 122 H75.2 M1 124 H75.2 M1 126 H75.2" stroke="#ffffff" stroke-width="0.05" opacity="0.035"/>
+  <rect x="0.5" y="0.5" width="75.2" height="127.5" rx="0.85" fill="none" stroke="#3b3d40" stroke-width="0.32"/>
+  <rect x="0.9" y="0.9" width="74.4" height="126.7" rx="0.65" fill="none" stroke="#070809" stroke-width="0.22" opacity="0.82"/>
+  <path d="M20 12.5 H56.2" stroke="url(#gold-rule)" stroke-width="0.36"/>
+
+  <text class="name" x="38.1" y="7.35">CONSTELLATE</text>
+  <text class="tag" x="38.1" y="10.75">RELATIONAL EVENT MEMORY</text>
+
+  <!-- display backing: the live NanoVG renderer sits on this glass -->
+  <rect x="17.8" y="16.75" width="40.6" height="38.1" rx="2" fill="#030506" stroke="#090a0b" stroke-width="1"/>
+  <rect x="18.25" y="17.2" width="39.7" height="37.2" rx="1.55" fill="none" stroke="#d19b40" stroke-width="0.32" opacity="0.8"/>
+  <rect x="18.55" y="17.5" width="39.1" height="36.6" rx="1.35" fill="url(#display-glow)"/>
+
+  <!-- true circular sweeps sit concentrically outside the knob shadows -->
+  <g fill="none" stroke="#e2ad55" stroke-width="0.4" stroke-linecap="round" opacity="0.86">
+    <path d="M6.69 32.51 A6.8 6.8 0 1 1 16.31 32.51"/>
+    <path d="M6.69 52.71 A6.8 6.8 0 1 1 16.31 52.71"/>
+    <path d="M59.89 32.51 A6.8 6.8 0 1 1 69.51 32.51"/>
+    <path d="M59.89 52.71 A6.8 6.8 0 1 1 69.51 52.71"/>
+    <path d="M33.35 61.07 A9.5 9.5 0 0 0 30.32 74.75" stroke-width="0.46"/>
+    <path d="M42.85 61.07 A9.5 9.5 0 0 1 45.88 74.75" stroke-width="0.46"/>
+  </g>
+  <g fill="#e2ad55">
+    <circle cx="11.5" cy="20.9" r="0.43"/>
+    <circle cx="11.5" cy="41.1" r="0.43"/>
+    <circle cx="64.7" cy="20.9" r="0.43"/>
+    <circle cx="64.7" cy="41.1" r="0.43"/>
+    <circle cx="33.35" cy="61.07" r="0.48"/><circle cx="30.32" cy="74.75" r="0.48"/>
+    <circle cx="42.85" cy="61.07" r="0.48"/><circle cx="45.88" cy="74.75" r="0.48"/>
+  </g>
+
+  <text class="label" x="11.5" y="37.2">MEMORY</text>
+  <text class="label" x="11.5" y="57.4">AFFINITY</text>
+  <text class="label" x="64.7" y="37.2">DRIFT</text>
+  <text class="label" x="64.7" y="57.4">DENSITY</text>
+
+  <text class="label amber" x="38.1" y="59.7">MORPH</text>
+  <text class="small" x="23.7" y="71.9">LIVE</text>
+  <text class="small" x="52.5" y="71.9">DREAM</text>
+
+  <text class="control-label" x="14.5" y="94.1">LEARN</text>
+  <text class="control-label" x="32.2" y="94.1">CV</text>
+  <text class="control-label" x="44" y="94.1">AMT</text>
+  <text class="control-label" x="61.7" y="94.1">HOLD</text>
+
+  <path d="M4.5 96.1 H71.7" stroke="#4b4a47" stroke-width="0.25"/>
+  <text class="port-label" x="7.6" y="98">A</text>
+  <text class="port-label" x="19.8" y="98">B</text>
+  <text class="port-label" x="32" y="98">C</text>
+  <text class="port-label" x="44.2" y="98">D</text>
+  <text class="port-label" x="56.4" y="98">CLOCK</text>
+  <text class="port-label" x="68.6" y="98">RESET</text>
+
+  <g fill="#e2ad55" opacity="0.88">
+    <circle cx="7.6" cy="107.15" r="0.42"/><circle cx="19.8" cy="107.15" r="0.42"/>
+    <circle cx="32" cy="107.15" r="0.42"/><circle cx="44.2" cy="107.15" r="0.42"/>
+    <circle cx="56.4" cy="107.15" r="0.42"/><circle cx="68.6" cy="107.15" r="0.42"/>
+  </g>
+
+  <path d="M4.5 109.1 H71.7" stroke="#e2ad55" stroke-width="0.3" opacity="0.72"/>
+  <circle cx="38.1" cy="109.1" r="0.55" fill="#e2ad55"/>
+  <text class="port-label" x="10.5" y="112.7">A</text>
+  <text class="port-label" x="24.3" y="112.7">B</text>
+  <text class="port-label" x="38.1" y="112.7">C</text>
+  <text class="port-label" x="51.9" y="112.7">D</text>
+  <text class="port-label" x="65.7" y="112.7">THREAD</text>
+
+  <!-- colour coding is printed under the corresponding output sockets -->
+  <g fill="none" stroke-width="0.65" opacity="0.92">
+    <circle cx="10.5" cy="118" r="3.45" stroke="#25d6f2"/>
+    <circle cx="24.3" cy="118" r="3.45" stroke="#ffb525"/>
+    <circle cx="38.1" cy="118" r="3.45" stroke="#f042a4"/>
+    <circle cx="51.9" cy="118" r="3.45" stroke="#83e342"/>
+    <circle cx="65.7" cy="118" r="3.45" stroke="#a5abb3"/>
+  </g>
+  <g fill="#e2ad55" opacity="0.88">
+    <circle cx="10.5" cy="123.25" r="0.42"/><circle cx="24.3" cy="123.25" r="0.42"/>
+    <circle cx="38.1" cy="123.25" r="0.42"/><circle cx="51.9" cy="123.25" r="0.42"/>
+    <circle cx="65.7" cy="123.25" r="0.42"/>
+  </g>
+
+  <text class="brand" x="38.1" y="127.35">halfagiraf</text>
+</svg>

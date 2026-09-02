@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="71.12mm" height="128.5mm" viewBox="0 0 71.12 128.5">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#252729"/><stop offset=".16" stop-color="#161719"/><stop offset=".62" stop-color="#0e0f11"/><stop offset="1" stop-color="#17181a"/></linearGradient>
+    <radialGradient id="surface" cx=".43" cy=".16" r=".92"><stop stop-color="#fff" stop-opacity=".055"/><stop offset=".48" stop-color="#fff" stop-opacity=".01"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></radialGradient>
+    <linearGradient id="slot" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#050505"/><stop offset=".45" stop-color="#111214"/><stop offset="1" stop-color="#000"/></linearGradient>
+    <style>
+      .title { fill:#e9bd72; font-family:'DejaVu Sans','Arial',sans-serif; font-size:4.25px; font-weight:400; letter-spacing:.68px; text-anchor:middle; }
+      .tag { fill:#d3a24f; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.22px; font-weight:600; letter-spacing:.5px; text-anchor:middle; }
+      .label { fill:#e0b15f; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.66px; font-weight:400; letter-spacing:.16px; text-anchor:middle; }
+      .small { fill:#d9aa59; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.16px; font-weight:500; letter-spacing:.08px; text-anchor:middle; }
+      .ports { fill:#e5b867; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.28px; font-weight:500; letter-spacing:.04px; text-anchor:middle; }
+      .brand { fill:#d5a451; font-family:'DejaVu Sans','Arial',sans-serif; font-size:1.52px; font-weight:400; letter-spacing:.72px; text-anchor:middle; }
+    </style>
+  </defs>
+  <rect width="71.12" height="128.5" fill="url(#panel)"/>
+  <rect width="71.12" height="128.5" fill="url(#surface)"/>
+  <path d="M1 2H70.12M1 4H70.12M1 6H70.12M1 8H70.12M1 10H70.12M1 12H70.12M1 14H70.12M1 16H70.12M1 18H70.12M1 20H70.12M1 22H70.12M1 24H70.12M1 26H70.12M1 28H70.12M1 30H70.12M1 32H70.12M1 34H70.12M1 36H70.12M1 38H70.12M1 40H70.12M1 42H70.12M1 44H70.12M1 46H70.12M1 48H70.12M1 50H70.12M1 52H70.12M1 54H70.12M1 56H70.12M1 58H70.12M1 60H70.12M1 62H70.12M1 64H70.12M1 66H70.12M1 68H70.12M1 70H70.12M1 72H70.12M1 74H70.12M1 76H70.12M1 78H70.12M1 80H70.12M1 82H70.12M1 84H70.12M1 86H70.12M1 88H70.12M1 90H70.12M1 92H70.12M1 94H70.12M1 96H70.12M1 98H70.12M1 100H70.12M1 102H70.12M1 104H70.12M1 106H70.12M1 108H70.12M1 110H70.12M1 112H70.12M1 114H70.12M1 116H70.12M1 118H70.12M1 120H70.12M1 122H70.12M1 124H70.12M1 126H70.12" stroke="#fff" stroke-width=".045" opacity=".034"/>
+  <rect x=".42" y=".42" width="70.28" height="127.66" rx=".75" fill="none" stroke="#3b3c3e" stroke-width=".28"/>
+  <rect x=".78" y=".78" width="69.56" height="126.94" rx=".55" fill="none" stroke="#050607" stroke-width=".2"/>
+
+  <!-- elongated mounting slots used by the approved concept -->
+  <g fill="url(#slot)" stroke="#4b4c4e" stroke-width=".22">
+    <rect x="2.1" y="2.1" width="5.7" height="2.35" rx="1.16"/><rect x="63.32" y="2.1" width="5.7" height="2.35" rx="1.16"/>
+    <rect x="2.1" y="124.05" width="5.7" height="2.35" rx="1.16"/><rect x="63.32" y="124.05" width="5.7" height="2.35" rx="1.16"/>
+  </g>
+  <g fill="#7a7b7c" opacity=".34"><ellipse cx="4.25" cy="2.75" rx="1.3" ry=".32"/><ellipse cx="65.47" cy="2.75" rx="1.3" ry=".32"/><ellipse cx="4.25" cy="124.7" rx="1.3" ry=".32"/><ellipse cx="65.47" cy="124.7" rx="1.3" ry=".32"/></g>
+
+  <text class="title" x="35.56" y="7.2">PALIMPSEST</text>
+  <text class="tag" x="35.56" y="10.25">SPECTRAL MEMORY INSTRUMENT</text>
+  <path d="M22 11.45H49.12" stroke="#d1a04c" stroke-width=".22" opacity=".58"/>
+
+  <!-- deep inset glass bezel beneath the live renderer -->
+  <rect x="16.35" y="13.3" width="38.42" height="40.2" rx="2.3" fill="#020304" stroke="#030303" stroke-width="1.05"/>
+  <rect x="16.72" y="13.66" width="37.68" height="39.46" rx="1.9" fill="none" stroke="#805c22" stroke-width=".62"/>
+  <rect x="17.02" y="13.96" width="37.08" height="38.86" rx="1.55" fill="#020608" stroke="#dda94a" stroke-width=".22" opacity=".9"/>
+
+  <!-- complete circular sweeps remain visibly outside every custom knob -->
+  <g fill="none" stroke="#dca94f" stroke-width=".56" stroke-linecap="round" stroke-dasharray=".01 1.14" opacity=".86">
+    <path d="M3.75 26.74 A6.5 6.5 0 1 1 12.85 26.74"/>
+    <path d="M3.75 45.84 A6.5 6.5 0 1 1 12.85 45.84"/>
+    <path d="M3.75 64.94 A6.5 6.5 0 1 1 12.85 64.94"/>
+    <path d="M58.25 26.74 A6.5 6.5 0 1 1 67.35 26.74"/>
+    <path d="M58.25 45.84 A6.5 6.5 0 1 1 67.35 45.84"/>
+    <path d="M58.25 64.94 A6.5 6.5 0 1 1 67.35 64.94"/>
+    <path d="M28.45 61.15 A10.1 10.1 0 0 0 26.64 75.8"/>
+    <path d="M42.67 61.15 A10.1 10.1 0 0 1 44.48 75.8"/>
+  </g>
+  <g fill="none" stroke="#dca94f" stroke-width=".43" stroke-linecap="round" opacity=".9">
+    <path d="M3.75 26.74l1.25-1.2M11.6 25.54l1.25 1.2M3.75 45.84l1.25-1.2M11.6 44.64l1.25 1.2M3.75 64.94l1.25-1.2M11.6 63.74l1.25 1.2"/>
+    <path d="M58.25 26.74l1.25-1.2M66.1 25.54l1.25 1.2M58.25 45.84l1.25-1.2M66.1 44.64l1.25 1.2M58.25 64.94l1.25-1.2M66.1 63.74l1.25 1.2"/>
+    <path d="M26.64 75.8l1.18-1.45M43.3 74.35l1.18 1.45" stroke-width=".5"/>
+  </g>
+  <g fill="#dda950">
+    <circle cx="8.3" cy="15.6" r=".42"/><circle cx="8.3" cy="34.7" r=".42"/><circle cx="8.3" cy="53.8" r=".42"/>
+    <circle cx="62.8" cy="15.6" r=".42"/><circle cx="62.8" cy="34.7" r=".42"/><circle cx="62.8" cy="53.8" r=".42"/>
+    <circle cx="28.45" cy="61.15" r=".47"/><circle cx="26.64" cy="75.8" r=".47"/><circle cx="42.67" cy="61.15" r=".47"/><circle cx="44.48" cy="75.8" r=".47"/>
+  </g>
+
+  <text class="label" x="8.3" y="31.3">AGE</text><text class="label" x="8.3" y="50.4">IMPRINT</text><text class="label" x="8.3" y="69.5">EROSION</text>
+  <text class="label" x="62.8" y="31.3">GRAVITY</text><text class="label" x="62.8" y="50.4">DRIFT</text><text class="label" x="62.8" y="69.5">BLOOM</text>
+  <text class="label" x="35.56" y="58.2">TRACE</text>
+  <text class="small" x="20.8" y="69.8">LIVE</text><text class="small" x="50.3" y="69.8">GHOST</text>
+  <g class="small"><text x="2.45" y="28.8">−</text><text x="14.15" y="28.8">+</text><text x="2.45" y="47.9">−</text><text x="14.15" y="47.9">+</text><text x="2.45" y="67">−</text><text x="14.15" y="67">+</text><text x="56.95" y="28.8">−</text><text x="68.65" y="28.8">+</text><text x="56.95" y="47.9">−</text><text x="68.65" y="47.9">+</text><text x="56.95" y="67">−</text><text x="68.65" y="67">+</text><text x="25.1" y="77.3">−</text><text x="46.05" y="77.3">+</text></g>
+
+  <text class="label" x="23" y="90.4">SEAL</text><text class="label" x="48.1" y="90.4">WASH</text>
+  <path d="M19.2 83.2h2.2l1.6-2.1 1.6 2.1h2.2M44.2 82.1c1.25-1.5 2.7-1.5 3.9 0s2.7 1.5 3.9 0" fill="none" stroke="#d5a24a" stroke-width=".35" opacity=".72"/>
+
+  <path d="M3.2 91.9H67.92" stroke="#56534b" stroke-width=".22"/>
+  <text class="ports" x="7" y="94">IN L</text><text class="ports" x="18.42" y="94">IN R</text><text class="ports" x="29.84" y="94">V/OCT</text>
+  <text class="ports" x="41.26" y="94">CLOCK</text><text class="ports" x="52.68" y="94">EXCITE</text><text class="ports" x="64.1" y="94">RESET</text>
+  <g fill="#d8a64d" opacity=".75"><circle cx="7" cy="108.15" r=".34"/><circle cx="18.42" cy="108.15" r=".34"/><circle cx="29.84" cy="108.15" r=".34"/><circle cx="41.26" cy="108.15" r=".34"/><circle cx="52.68" cy="108.15" r=".34"/><circle cx="64.1" cy="108.15" r=".34"/></g>
+
+  <path d="M3.2 110.1H33.9M37.2 110.1H67.92" stroke="#d5a149" stroke-width=".3" opacity=".65"/><circle cx="35.56" cy="110.1" r=".45" fill="#d5a149"/>
+  <text class="ports" x="9.2" y="113.1">OUT L</text><text class="ports" x="22.4" y="113.1">OUT R</text><text class="ports" x="35.56" y="113.1">GHOST L</text><text class="ports" x="48.75" y="113.1">GHOST R</text><text class="ports" x="61.95" y="113.1">MOTION</text>
+  <g fill="none" stroke-width=".42" opacity=".78"><circle cx="9.2" cy="117.4" r="3.12" stroke="#27d4e7"/><circle cx="22.4" cy="117.4" r="3.12" stroke="#e6ad35"/><circle cx="35.56" cy="117.4" r="3.12" stroke="#eb3d9b"/><circle cx="48.75" cy="117.4" r="3.12" stroke="#80dc45"/><circle cx="61.95" cy="117.4" r="3.12" stroke="#aaa9a4"/></g>
+  <text class="brand" x="35.56" y="126.1">halfagiraf</text>
+</svg>

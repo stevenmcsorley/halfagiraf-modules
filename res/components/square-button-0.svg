@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="8mm" height="8mm" viewBox="0 0 8 8">
+  <defs>
+    <linearGradient id="bezel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b3d3f"/>
+      <stop offset="0.45" stop-color="#090a0c"/>
+      <stop offset="1" stop-color="#202225"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#292b2d"/>
+      <stop offset="1" stop-color="#111214"/>
+    </linearGradient>
+  </defs>
+  <rect x="0.12" y="0.12" width="7.76" height="7.76" rx="1.05" fill="#050607" stroke="#050506" stroke-width="0.24"/>
+  <rect x="0.52" y="0.52" width="6.96" height="6.96" rx="0.86" fill="url(#bezel)" stroke="#525252" stroke-width="0.18"/>
+  <rect x="1.45" y="1.45" width="5.1" height="5.1" rx="0.52" fill="url(#cap)" stroke="#08090a" stroke-width="0.2"/>
+  <path d="M1.85 1.82 H6.15" stroke="#606164" stroke-width="0.13" opacity="0.42"/>
+</svg>
