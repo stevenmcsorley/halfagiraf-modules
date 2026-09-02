@@ -63,7 +63,7 @@ GitHub Actions builds Windows x64, Linux x64, macOS Intel, and macOS Apple Silic
 
 ## Identity and license
 
-- Plugin slug: `halfagiraf-modules`
+- Plugin slug: `halfagiraf`
 - Plugin name: `halfagiraf Modules`
 - Module slug: `Palimpsest`
 - License: GPL-3.0-or-later

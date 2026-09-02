@@ -32,7 +32,7 @@ same context menu.
 
 ## Installation
 
-Download the unified `halfagiraf-modules` `.vcvplugin` file for your computer from the
+Download the `halfagiraf` `.vcvplugin` file for your computer from the
 [latest GitHub release](https://github.com/stevenmcsorley/halfagiraf-modules/releases/latest).
 
 Copy the downloaded file into the matching Rack plugin folder, then restart Rack:

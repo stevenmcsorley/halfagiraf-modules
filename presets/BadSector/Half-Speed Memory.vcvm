@@ -1,5 +1,5 @@
 {
-  "plugin": "halfagiraf-modules",
+  "plugin": "halfagiraf",
   "model": "BadSector",
   "version": "2.0.0",
   "params": [

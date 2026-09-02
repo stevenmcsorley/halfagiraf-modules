@@ -66,7 +66,7 @@ GitHub Actions builds release packages for Windows x64, Linux x64, macOS Intel, 
 
 ## Identity and license
 
-- Plugin slug: `halfagiraf-modules`
+- Plugin slug: `halfagiraf`
 - Plugin name: `halfagiraf Modules`
 - Module slug: `Constellate`
 - License: GPL-3.0-or-later
