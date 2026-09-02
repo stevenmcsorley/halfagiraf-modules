@@ -32,12 +32,6 @@ Learns the relationships between four trigger streams, then uses that memory to 
 
 [Watch the 15-second Constellate demo](docs/Constellate-demo.mp4)
 
-### [Palimpsest](docs/Palimpsest.md)
-
-<p align="center"><img src="docs/Palimpsest.png" width="280" alt="Palimpsest in VCV Rack"/></p>
-
-A stereo spectral-memory instrument. Incoming sound passes through four ageing spectral layers and returns as an evolving, pitch-responsive voice.
-
 ## Install
 
 The plugin is being reviewed for the VCV Library. In the meantime, platform builds are available from [GitHub Releases](https://github.com/stevenmcsorley/halfagiraf-modules/releases/latest).

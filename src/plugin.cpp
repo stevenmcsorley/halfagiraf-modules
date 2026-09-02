@@ -8,5 +8,4 @@ void init(Plugin* p) {
 	p->addModel(modelMOD1);
 	p->addModel(modelEntwine);
 	p->addModel(modelConstellate);
-	p->addModel(modelPalimpsest);
 }

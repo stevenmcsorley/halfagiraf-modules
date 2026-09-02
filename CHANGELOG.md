@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+- Removes Palimpsest while its audio engine is reworked.
+
 ## 2.0.0
 
 - First unified release of the halfagiraf Modules plugin.

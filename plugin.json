@@ -1,7 +1,7 @@
 {
   "slug": "halfagiraf",
   "name": "halfagiraf Modules",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "GPL-3.0-or-later",
   "brand": "halfagiraf",
   "author": "Steven McSorley",
@@ -42,13 +42,6 @@
       "description": "Four-channel relational event memory and generative trigger processor with transition-confidence CV.",
       "manualUrl": "https://github.com/stevenmcsorley/halfagiraf-modules/blob/main/docs/Constellate.md",
       "tags": ["Sequencer", "Random", "Clock", "Utility", "Visual"]
-    },
-    {
-      "slug": "Palimpsest",
-      "name": "Palimpsest",
-      "description": "Stereo spectral-memory instrument for evolving, eroding, and pitch-responsive ambient textures.",
-      "manualUrl": "https://github.com/stevenmcsorley/halfagiraf-modules/blob/main/docs/Palimpsest.md",
-      "tags": ["Effect", "Filter", "Recording", "Visual"]
     }
   ]
 }

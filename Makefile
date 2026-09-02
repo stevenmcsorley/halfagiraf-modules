@@ -5,7 +5,7 @@ CFLAGS +=
 CXXFLAGS +=
 LDFLAGS +=
 
-SOURCES += $(wildcard src/*.cpp)
+SOURCES += $(filter-out src/Palimpsest.cpp,$(wildcard src/*.cpp))
 
 DISTRIBUTABLES += res
 DISTRIBUTABLES += $(wildcard LICENSE*)
