@@ -2,8 +2,6 @@
 
 Five instruments, processors, and modulation sources for VCV Rack 2 by halfagiraf.
 
-This is the single official plugin package for **Bad Sector**, **MOD1**, **Entwine**, **Constellate**, and **Palimpsest**. Each module keeps its established module slug, controls, DSP behavior, artwork, module-local serialization, and presets.
-
 | Module | Purpose | Manual |
 | --- | --- | --- |
 | **Bad Sector** | Stereo buffer corruption and beat-locked broken playback | [Read the manual](docs/BadSector.md) |
@@ -51,8 +49,6 @@ Continuously analyzes stereo input into four progressively older spectral layers
 ## Installation
 
 The preferred installation method is the official VCV Library. Until review is complete, download the `.vcvplugin` matching your computer from the [latest GitHub release](https://github.com/stevenmcsorley/halfagiraf-modules/releases/latest), place it in Rack's matching `plugins-<OS>-<CPU>` folder, and restart Rack.
-
-Do not install the unified package alongside any of the earlier standalone development packages. They contain the same module slugs under different plugin slugs and are retained only as source history.
 
 ## Building and testing
 
