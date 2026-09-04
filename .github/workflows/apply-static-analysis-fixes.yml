@@ -1,0 +1,254 @@
+name: Apply static-analysis fixes
+
+on:
+  push:
+    branches:
+      - fix/static-analysis-issue-1
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/static-analysis-issue-1
+
+      - name: Apply targeted fixes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected exactly one match, found {count}")
+              return text.replace(old, new, 1)
+
+          # Entwine: make WAV parsing fail safely, harden wavetable indexing,
+          # and render a neutral cloud layer for module-browser previews.
+          path = Path("src/Entwine.cpp")
+          text = path.read_text()
+          text = replace_once(
+              text,
+              '#include <vector>\n',
+              '#include <vector>\n#include <limits>\n',
+              'Entwine include',
+          )
+
+          start = text.index('static bool readWavMonoH(const std::string& path, std::vector<float>& out) {')
+          end_marker = '\n}\n\n// Per-voice deterministic RNG'
+          end = text.index(end_marker, start)
+          new_reader = r'''static bool readWavMonoH(const std::string& path, std::vector<float>& out) {
+	FILE* f = std::fopen(path.c_str(), "rb");
+	if (!f) return false;
+
+	auto closeAndFail = [&]() -> bool {
+		std::fclose(f);
+		return false;
+	};
+	auto rd32 = [&](uint32_t& value) -> bool {
+		uint8_t b[4];
+		if (std::fread(b, 1, 4, f) != 4) return false;
+		value = (uint32_t) b[0]
+		      | ((uint32_t) b[1] << 8)
+		      | ((uint32_t) b[2] << 16)
+		      | ((uint32_t) b[3] << 24);
+		return true;
+	};
+	auto rd16 = [&](uint16_t& value) -> bool {
+		uint8_t b[2];
+		if (std::fread(b, 1, 2, f) != 2) return false;
+		value = (uint16_t) ((uint16_t) b[0] | ((uint16_t) b[1] << 8));
+		return true;
+	};
+	auto seekForward = [&](uint32_t bytes) -> bool {
+		if ((uint64_t) bytes > (uint64_t) std::numeric_limits<long>::max()) return false;
+		return std::fseek(f, (long) bytes, SEEK_CUR) == 0;
+	};
+
+	char id[5] = {};
+	uint32_t riffSize = 0;
+	if (std::fread(id, 1, 4, f) != 4 || std::strncmp(id, "RIFF", 4))
+		return closeAndFail();
+	if (!rd32(riffSize))
+		return closeAndFail();
+	if (std::fread(id, 1, 4, f) != 4 || std::strncmp(id, "WAVE", 4))
+		return closeAndFail();
+
+	int channels = 1, bits = 16, format = 1;
+	bool gotFmt = false;
+	while (true) {
+		size_t idBytes = std::fread(id, 1, 4, f);
+		if (idBytes == 0 && std::feof(f)) break;
+		if (idBytes != 4) return closeAndFail();
+
+		uint32_t sz = 0;
+		if (!rd32(sz)) return closeAndFail();
+
+		if (!std::strncmp(id, "fmt ", 4)) {
+			if (sz < 16) return closeAndFail();
+			uint16_t formatValue = 0, channelsValue = 0, blockAlign = 0, bitsValue = 0;
+			uint32_t sampleRate = 0, byteRate = 0;
+			if (!rd16(formatValue) || !rd16(channelsValue)
+				|| !rd32(sampleRate) || !rd32(byteRate)
+				|| !rd16(blockAlign) || !rd16(bitsValue))
+				return closeAndFail();
+			format = (int) formatValue;
+			channels = std::max(1, (int) channelsValue);
+			bits = (int) bitsValue;
+			if (sz > 16 && !seekForward(sz - 16)) return closeAndFail();
+			if ((sz & 1u) && !seekForward(1)) return closeAndFail();
+			gotFmt = true;
+		}
+		else if (!std::strncmp(id, "data", 4) && gotFmt) {
+			int bytesPer = bits / 8;
+			if (bytesPer < 2 || bytesPer > 4) return closeAndFail();
+			size_t frameBytes = (size_t) bytesPer * (size_t) channels;
+			if (frameBytes == 0) return closeAndFail();
+			size_t frames = (size_t) sz / frameBytes;
+			out.clear();
+			out.reserve(frames);
+			std::vector<uint8_t> buf(frameBytes);
+			for (size_t i = 0; i < frames; i++) {
+				if (std::fread(buf.data(), 1, buf.size(), f) != buf.size())
+					return closeAndFail();
+				float acc = 0.f;
+				for (int c = 0; c < channels; c++) {
+					const uint8_t* p = &buf[(size_t) c * (size_t) bytesPer];
+					float v = 0.f;
+					if (format == 3 && bits == 32) {
+						float fv;
+						std::memcpy(&fv, p, 4);
+						v = fv;
+					}
+					else if (bits == 16) {
+						int16_t sv = (int16_t) (p[0] | (p[1] << 8));
+						v = sv / 32768.f;
+					}
+					else if (bits == 24) {
+						int32_t sv = p[0] | (p[1] << 8) | (p[2] << 16);
+						if (sv & 0x800000) sv -= 0x1000000;
+						v = sv / 8388608.f;
+					}
+					else if (bits == 32) {
+						int32_t sv;
+						std::memcpy(&sv, p, 4);
+						v = sv / 2147483648.f;
+					}
+					acc += v;
+				}
+				out.push_back(acc / channels);
+			}
+			std::fclose(f);
+			return !out.empty();
+		}
+		else {
+			if (!seekForward(sz)) return closeAndFail();
+			if ((sz & 1u) && !seekForward(1)) return closeAndFail();
+		}
+	}
+	std::fclose(f);
+	return false;
+}'''
+          text = text[:start] + new_reader + text[end:]
+
+          wt_start = text.index('\tfloat wtSample(float phase, float morph) {')
+          wt_end_marker = '\n\t}\n\n\t// Extend a scale table above its listed offsets.'
+          wt_end = text.index(wt_end_marker, wt_start)
+          new_wt = r'''	float wtSample(float phase, float morph) {
+		const float (*tab)[WT_LEN] = wtUserLoaded ? userWT : WAVETABLE;
+		int nf = std::max(1, std::min(activeWtFrames(), WT_FRAMES));
+		phase = std::isfinite(phase) ? wrap01(phase) : 0.f;
+		morph = std::isfinite(morph) ? clampf(morph, 0.f, (float) (nf - 1)) : 0.f;
+		float fp = phase * WT_LEN;
+		int i0 = (int) fp;
+		if (i0 < 0) i0 = 0;
+		if (i0 >= WT_LEN) i0 = WT_LEN - 1;
+		int i1 = (i0 + 1) & (WT_LEN - 1);
+		float fr = fp - i0;
+		int m0 = (int) morph;
+		if (m0 < 0) m0 = 0;
+		if (m0 > nf - 1) m0 = nf - 1;
+		int m1 = m0 < nf - 1 ? m0 + 1 : m0;
+		float mf = morph - m0;
+		float a = lerpf(tab[m0][i0], tab[m0][i1], fr);
+		float b = lerpf(tab[m1][i0], tab[m1][i1], fr);
+		return lerpf(a, b, mf);
+	}'''
+          text = text[:wt_start] + new_wt + text[wt_end:]
+
+          text = replace_once(
+              text,
+              '''\tvoid draw(const DrawArgs& args) override {\n\t\tif (!module) return;\n\t\tfloat lvlL = clampf(module->uiPulsar, 0.f, 1.f);\n\t\tfloat lvlR = clampf(module->uiQuasar, 0.f, 1.f);\n\t\tfloat g = clampf(module->uiGlow, 0.f, 1.f);\n\n\t\t// Coupling biases the nebula's colour: long notes drift warm, audio-rate goes cold.\n\t\tfloat warm = clampf(module->uiCoupling, 0.f, 1.f);\n''',
+              '''\tvoid draw(const DrawArgs& args) override {\n\t\t// Rack renders module-browser/library previews with module == nullptr. Keep a\n\t\t// restrained static nebula in that case instead of returning a blank layer.\n\t\tfloat lvlL = module ? clampf(module->uiPulsar, 0.f, 1.f) : 0.08f;\n\t\tfloat lvlR = module ? clampf(module->uiQuasar, 0.f, 1.f) : 0.08f;\n\t\tfloat g = module ? clampf(module->uiGlow, 0.f, 1.f) : 0.04f;\n\n\t\t// Coupling biases the nebula's colour: long notes drift warm, audio-rate goes cold.\n\t\tfloat warm = module ? clampf(module->uiCoupling, 0.f, 1.f) : 0.78f;\n\t\tfloat phase = module ? module->cloudPhase : 0.f;\n''',
+              'Entwine preview draw',
+          )
+          text = replace_once(
+              text,
+              '\t\t\tfloat ph = module->cloudPhase * 2.f * M_PI + b.x * 0.21f + b.y * 0.07f;\n',
+              '\t\t\tfloat ph = phase * 2.f * M_PI + b.x * 0.21f + b.y * 0.07f;\n',
+              'Entwine preview phase',
+          )
+          path.write_text(text)
+
+          # Constellate: make context construction self-validating and keep every
+          # weights access behind an explicit bounds check the analyzer can prove.
+          path = Path("src/ConstellateEngine.hpp")
+          text = path.read_text()
+          old_context = '''\tstatic int contextIndex(const int* history, int order) {\n\t\tint index = 0;\n\t\tfor (int i = order - 1; i >= 0; --i)\n\t\t\tindex = index * CHANNELS + history[i];\n\t\treturn index;\n\t}\n'''
+          new_context = '''\tstatic int contextIndex(const int* history, int order) {\n\t\tif (!history || order < 1 || order > MAX_ORDER)\n\t\t\treturn 0;\n\t\tint index = 0;\n\t\tfor (int i = order - 1; i >= 0; --i) {\n\t\t\tint event = history[i];\n\t\t\tif (event < 0 || event >= CHANNELS)\n\t\t\t\tevent = 0;\n\t\t\tindex = index * CHANNELS + event;\n\t\t}\n\t\treturn std::max(0, std::min(index, MAX_CONTEXTS - 1));\n\t}\n'''
+          text = replace_once(text, old_context, new_context, 'Constellate contextIndex')
+          text = replace_once(
+              text,
+              '''\t\tfor (int order = 1; order <= std::min(learnLength, MAX_ORDER); ++order) {\n\t\t\tint context = contextIndex(learnHistory, order);\n\t\t\tfloat* row = weights[order - 1][context];\n''',
+              '''\t\tfor (int order = 1; order <= std::min(learnLength, MAX_ORDER); ++order) {\n\t\t\tint context = contextIndex(learnHistory, order);\n\t\t\tif (context < 0 || context >= MAX_CONTEXTS)\n\t\t\t\tcontinue;\n\t\t\tfloat* row = weights[order - 1][context];\n''',
+              'Constellate observe bounds',
+          )
+          text = replace_once(
+              text,
+              '''\t\tfor (int order = highest; order >= 1; --order) {\n\t\t\tint context = contextIndex(playHistory, order);\n\t\t\tif (rowTotal(order, context) > 0.f) {\n''',
+              '''\t\tfor (int order = highest; order >= 1; --order) {\n\t\t\tint context = contextIndex(playHistory, order);\n\t\t\tif (context < 0 || context >= MAX_CONTEXTS)\n\t\t\t\tcontinue;\n\t\t\tif (rowTotal(order, context) > 0.f) {\n''',
+              'Constellate choose bounds',
+          )
+          path.write_text(text)
+
+          # Palimpsest: value-initialize Channel buffers so construction is
+          # statically safe even before resetRuntime()/clearMemory() run.
+          path = Path("src/PalimpsestEngine.hpp")
+          text = path.read_text()
+          replacements = {
+              '\t\tstd::array<float, FFT_SIZE> input;\n': '\t\tstd::array<float, FFT_SIZE> input{};\n',
+              '\t\tstd::array<float, FFT_SIZE> output;\n': '\t\tstd::array<float, FFT_SIZE> output{};\n',
+              '\t\tstd::array<float, FFT_SIZE> dry;\n': '\t\tstd::array<float, FFT_SIZE> dry{};\n',
+              '\t\tstd::array<std::complex<float>, FFT_SIZE> fft;\n': '\t\tstd::array<std::complex<float>, FFT_SIZE> fft{};\n',
+              '\t\tstd::array<float, BIN_COUNT> currentMagnitude;\n': '\t\tstd::array<float, BIN_COUNT> currentMagnitude{};\n',
+              '\t\tstd::array<std::array<float, BIN_COUNT>, MEMORY_LAYERS> memory;\n': '\t\tstd::array<std::array<float, BIN_COUNT>, MEMORY_LAYERS> memory{};\n',
+              '\t\tstd::array<float, BIN_COUNT> phase;\n': '\t\tstd::array<float, BIN_COUNT> phase{};\n',
+          }
+          for old, new in replacements.items():
+              text = replace_once(text, old, new, f'Palimpsest {old.strip()}')
+          path.write_text(text)
+          PY
+
+      - name: Validate deterministic tests and diff
+        run: |
+          git diff --check
+          mkdir -p build/tests
+          for source in tests/*.cpp; do
+            name="$(basename "$source" .cpp)"
+            g++ -std=c++11 -O2 -Wall -Wextra -pedantic "$source" -o "build/tests/$name"
+            "build/tests/$name"
+          done
+
+      - name: Commit fixes and remove temporary workflow
+        run: |
+          rm .github/workflows/apply-static-analysis-fixes.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/Entwine.cpp src/ConstellateEngine.hpp src/PalimpsestEngine.hpp .github/workflows/apply-static-analysis-fixes.yml
+          git commit -m "Fix static analysis findings"
+          git push origin HEAD:fix/static-analysis-issue-1
