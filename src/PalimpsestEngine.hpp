@@ -276,13 +276,13 @@ public:
 
 private:
 	struct Channel {
-		std::array<float, FFT_SIZE> input;
-		std::array<float, FFT_SIZE> output;
-		std::array<float, FFT_SIZE> dry;
+		std::array<float, FFT_SIZE> input{};
+		std::array<float, FFT_SIZE> output{};
+		std::array<float, FFT_SIZE> dry{};
 		std::array<std::complex<float>, FFT_SIZE> fft;
-		std::array<float, BIN_COUNT> currentMagnitude;
+		std::array<float, BIN_COUNT> currentMagnitude{};
 		std::array<std::array<float, BIN_COUNT>, MEMORY_LAYERS> memory;
-		std::array<float, BIN_COUNT> phase;
+		std::array<float, BIN_COUNT> phase{};
 		float energy = 0.f;
 		float centroid = 0.f;
 		float dcInput = 0.f;
