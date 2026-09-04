@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.2
+
+- Fixes Rack static-analysis findings in Entwine, Constellate, and Palimpsest support code.
+- Hardens Entwine WAV loading and wavetable bounds handling.
+- Keeps Entwine's decorative cloud layer visible in module-browser and library previews.
+- Preserves existing module DSP behaviour while making bounds and initialization explicit.
+
 ## 2.0.1
 
 - Removes Palimpsest while its audio engine is reworked.
