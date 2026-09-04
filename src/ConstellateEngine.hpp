@@ -87,10 +87,16 @@ struct Engine {
 	}
 
 	static int contextIndex(const int* history, int order) {
+		if (!history || order < 1 || order > MAX_ORDER)
+			return 0;
 		int index = 0;
-		for (int i = order - 1; i >= 0; --i)
-			index = index * CHANNELS + history[i];
-		return index;
+		for (int i = order - 1; i >= 0; --i) {
+			int event = history[i];
+			if (event < 0 || event >= CHANNELS)
+				event = 0;
+			index = index * CHANNELS + event;
+		}
+		return std::max(0, std::min(index, MAX_CONTEXTS - 1));
 	}
 
 	static void push(int* history, int& length, int event) {

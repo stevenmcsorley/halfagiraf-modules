@@ -19,37 +19,65 @@ static inline float lerpf(float a, float b, float t) { return a + (b - a) * t; }
 static bool readWavMonoH(const std::string& path, std::vector<float>& out) {
 	FILE* f = std::fopen(path.c_str(), "rb");
 	if (!f) return false;
-	auto rd32 = [&]() -> long { uint8_t b[4]; if (std::fread(b, 1, 4, f) != 4) return -1L; return (long) (b[0] | (b[1] << 8) | (b[2] << 16) | ((uint32_t) b[3] << 24)); };
-	auto rd16 = [&]() -> long { uint8_t b[2]; if (std::fread(b, 1, 2, f) != 2) return -1L; return (long) (b[0] | (b[1] << 8)); };
+
+	auto fail = [&]() -> bool { std::fclose(f); return false; };
+	auto rd32 = [&](uint32_t& value) -> bool {
+		uint8_t b[4];
+		if (std::fread(b, 1, 4, f) != 4) return false;
+		value = (uint32_t) b[0] | ((uint32_t) b[1] << 8) | ((uint32_t) b[2] << 16) | ((uint32_t) b[3] << 24);
+		return true;
+	};
+	auto rd16 = [&](uint16_t& value) -> bool {
+		uint8_t b[2];
+		if (std::fread(b, 1, 2, f) != 2) return false;
+		value = (uint16_t) ((uint16_t) b[0] | ((uint16_t) b[1] << 8));
+		return true;
+	};
+
 	char id[5] = {};
-	if (std::fread(id, 1, 4, f) != 4 || std::strncmp(id, "RIFF", 4)) { std::fclose(f); return false; }
-	rd32();
-	if (std::fread(id, 1, 4, f) != 4 || std::strncmp(id, "WAVE", 4)) { std::fclose(f); return false; }
+	uint32_t ignored32 = 0;
+	if (std::fread(id, 1, 4, f) != 4 || std::strncmp(id, "RIFF", 4)) return fail();
+	if (!rd32(ignored32)) return fail();
+	if (std::fread(id, 1, 4, f) != 4 || std::strncmp(id, "WAVE", 4)) return fail();
+
 	int channels = 1, bits = 16, format = 1;
 	bool gotFmt = false;
-	while (std::fread(id, 1, 4, f) == 4) {
-		long sz = rd32();
-		if (sz < 0) break;
+	while (true) {
+		size_t got = std::fread(id, 1, 4, f);
+		if (got == 0 && std::feof(f)) break;
+		if (got != 4) return fail();
+
+		uint32_t sz = 0;
+		if (!rd32(sz)) return fail();
+
 		if (!std::strncmp(id, "fmt ", 4)) {
-			format = (int) rd16();
-			channels = std::max(1, (int) rd16());
-			rd32(); rd32(); rd16();
-			bits = (int) rd16();
-			if (sz > 16) std::fseek(f, sz - 16, SEEK_CUR);
+			if (sz < 16) return fail();
+			uint16_t fmt = 0, chans = 0, ignored16 = 0, sampleBits = 0;
+			uint32_t ignoredRate = 0;
+			if (!rd16(fmt) || !rd16(chans) || !rd32(ignoredRate) || !rd32(ignored32)
+				|| !rd16(ignored16) || !rd16(sampleBits))
+				return fail();
+			format = (int) fmt;
+			channels = std::max(1, (int) chans);
+			bits = (int) sampleBits;
+			if (sz > 16 && std::fseek(f, (long) (sz - 16), SEEK_CUR) != 0) return fail();
+			if ((sz & 1u) && std::fseek(f, 1, SEEK_CUR) != 0) return fail();
 			gotFmt = true;
 		}
 		else if (!std::strncmp(id, "data", 4) && gotFmt) {
 			int bytesPer = bits / 8;
-			if (bytesPer < 2 || bytesPer > 4) { std::fclose(f); return false; }
-			long frames = sz / (bytesPer * channels);
+			if (bytesPer < 2 || bytesPer > 4) return fail();
+			size_t frameBytes = (size_t) bytesPer * (size_t) channels;
+			if (!frameBytes) return fail();
+			size_t frames = (size_t) sz / frameBytes;
 			out.clear();
 			out.reserve(frames);
-			std::vector<uint8_t> buf((size_t) bytesPer * channels);
-			for (long i = 0; i < frames; i++) {
-				if (std::fread(buf.data(), 1, buf.size(), f) != buf.size()) break;
+			std::vector<uint8_t> buf(frameBytes);
+			for (size_t i = 0; i < frames; i++) {
+				if (std::fread(buf.data(), 1, buf.size(), f) != buf.size()) return fail();
 				float acc = 0.f;
 				for (int c = 0; c < channels; c++) {
-					const uint8_t* p = &buf[(size_t) c * bytesPer];
+					const uint8_t* p = &buf[(size_t) c * (size_t) bytesPer];
 					float v = 0.f;
 					if (format == 3 && bits == 32) { float fv; std::memcpy(&fv, p, 4); v = fv; }
 					else if (bits == 16) { int16_t sv = (int16_t) (p[0] | (p[1] << 8)); v = sv / 32768.f; }
@@ -63,7 +91,8 @@ static bool readWavMonoH(const std::string& path, std::vector<float>& out) {
 			return !out.empty();
 		}
 		else {
-			std::fseek(f, sz + (sz & 1), SEEK_CUR);
+			long skip = (long) sz + (long) (sz & 1u);
+			if (std::fseek(f, skip, SEEK_CUR) != 0) return fail();
 		}
 	}
 	std::fclose(f);
@@ -316,14 +345,14 @@ struct Entwine : Module {
 
 	float wtSample(float phase, float morph) {
 		const float (*tab)[WT_LEN] = wtUserLoaded ? userWT : WAVETABLE;
-		int nf = activeWtFrames();
+		int nf = std::max(1, std::min(activeWtFrames(), WT_FRAMES));
+		phase = std::isfinite(phase) ? wrap01(phase) : 0.f;
+		morph = std::isfinite(morph) ? clampf(morph, 0.f, (float) (nf - 1)) : 0.f;
 		float fp = phase * WT_LEN;
-		int i0 = (int) fp;
+		int i0 = clamp((int) fp, 0, WT_LEN - 1);
 		int i1 = (i0 + 1) & (WT_LEN - 1);
 		float fr = fp - i0;
-		int m0 = (int) morph;
-		if (m0 < 0) m0 = 0;
-		if (m0 > nf - 1) m0 = nf - 1;
+		int m0 = clamp((int) morph, 0, nf - 1);
 		int m1 = m0 < nf - 1 ? m0 + 1 : m0;
 		float mf = morph - m0;
 		float a = lerpf(tab[m0][i0], tab[m0][i1], fr);
@@ -643,13 +672,14 @@ struct EntwineClouds : Widget {
 	Entwine* module = nullptr;
 
 	void draw(const DrawArgs& args) override {
-		if (!module) return;
-		float lvlL = clampf(module->uiPulsar, 0.f, 1.f);
-		float lvlR = clampf(module->uiQuasar, 0.f, 1.f);
-		float g = clampf(module->uiGlow, 0.f, 1.f);
+		// Rack creates browser/library previews with module == nullptr.
+		float lvlL = module ? clampf(module->uiPulsar, 0.f, 1.f) : 0.08f;
+		float lvlR = module ? clampf(module->uiQuasar, 0.f, 1.f) : 0.08f;
+		float g = module ? clampf(module->uiGlow, 0.f, 1.f) : 0.04f;
 
 		// Coupling biases the nebula's colour: long notes drift warm, audio-rate goes cold.
-		float warm = clampf(module->uiCoupling, 0.f, 1.f);
+		float warm = module ? clampf(module->uiCoupling, 0.f, 1.f) : 0.78f;
+		float phase = module ? module->cloudPhase : 0.f;
 
 		static const struct { float x, y, r, cr, cg, cb; } BLOBS[] = {
 			{17.f,  70.f,  13.f, 0.97f, 0.65f, 0.78f},
@@ -671,7 +701,7 @@ struct EntwineClouds : Widget {
 			if (a < 0.01f) continue;
 			Vec p = mm2px(Vec(b.x, b.y));
 			float r = mm2px(Vec(b.r, 0.f)).x;
-			float ph = module->cloudPhase * 2.f * M_PI + b.x * 0.21f + b.y * 0.07f;
+			float ph = phase * 2.f * M_PI + b.x * 0.21f + b.y * 0.07f;
 			// the voices push the plumes outward as they sound
 			float rr = r * (1.f + 0.07f * std::sin(ph) + 0.10f * lvl);
 			float ba = a * (0.42f + 0.12f * std::sin(ph * 0.7f));
