@@ -1,0 +1,444 @@
+{
+  "eurorackRepository": "https://github.com/pichenettes/eurorack",
+  "eurorackRevision": "d8f473915232af74347762b6365202bfd26f73f6",
+  "stmlibRepository": "https://github.com/pichenettes/stmlib",
+  "stmlibRevision": "e3bd7c9cc00e4364166f9905c0509b6ffd0535ec",
+  "files": [
+    {
+      "path": "beads/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "beads/background_buffer_backup.cc",
+      "sha256": "dd439e74c5991f640dbaad1e4c2ff2cc380111276d137b20e4694354e7ba6c67"
+    },
+    {
+      "path": "beads/background_buffer_backup.h",
+      "sha256": "8112f58545179bdb3cc7541e706cd7c9904c7c2db06c4ae2792d10b1a41c880e"
+    },
+    {
+      "path": "beads/beads.cc",
+      "sha256": "84f7478a42a12eaab7bdf4a15e39ad2216df7a818c5cef8fa51d384bb7775837"
+    },
+    {
+      "path": "beads/bootloader/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "beads/bootloader/bootloader.cc",
+      "sha256": "ad3d3e80157f851a0e4023c09a5b6fc63c96781e4c59a004269b5e0c90cf9efc"
+    },
+    {
+      "path": "beads/bootloader/makefile",
+      "sha256": "201d99fa653b8b09b41eb478d66b37019f9b874eb711c20a31cca22c622aade1"
+    },
+    {
+      "path": "beads/calibrator.h",
+      "sha256": "0f16a1c545572111175f4826b21efd7f8dc8f5becd93ea63ebda946688706c30"
+    },
+    {
+      "path": "beads/cv_reader.cc",
+      "sha256": "27e8316ec20087bdf60b789431762b3179e83eb8a8262293622f54d2d39b57eb"
+    },
+    {
+      "path": "beads/cv_reader.h",
+      "sha256": "1cf7302ab4518e062468f43a4882080d2dd5dafd84767fceb7e1218a95c99fdf"
+    },
+    {
+      "path": "beads/drivers/codec.cc",
+      "sha256": "77827e11c62e4d244d806e4dbde48de394596798fc13683df5f8b6016c220d6d"
+    },
+    {
+      "path": "beads/drivers/codec.h",
+      "sha256": "b175db2b35342fa4fa9e93b8f6f9570eb81b06857c7bc834776bffbd9455d996"
+    },
+    {
+      "path": "beads/drivers/cv_adc.cc",
+      "sha256": "bfe8ad83768893705507b16076e1bef019fac0da5022e0b0ccc58a7e9f918070"
+    },
+    {
+      "path": "beads/drivers/cv_adc.h",
+      "sha256": "4a5542bbe87c61b42cbf61f4708c24d2c9d7e0e836abdeb9e9e31d440bce3a5b"
+    },
+    {
+      "path": "beads/drivers/debug_pin.h",
+      "sha256": "b0f213a449d5ee69068c78e9de27511d3b9c5d5baf445eb42b0943ba6d4534aa"
+    },
+    {
+      "path": "beads/drivers/debug_port.cc",
+      "sha256": "458c362f852396756490a94d5935ca4be30588b3889b01704c07994c0bfe8d05"
+    },
+    {
+      "path": "beads/drivers/debug_port.h",
+      "sha256": "c0cb195f48615f8f3c5690ee061ee2589b57be5c40858d5051c78260f7ef7819"
+    },
+    {
+      "path": "beads/drivers/freeze_input.cc",
+      "sha256": "40d7af72379fb9977e8cac0b6c95f74f4867c84d2ed6b107ee4dfb00a290f5ae"
+    },
+    {
+      "path": "beads/drivers/freeze_input.h",
+      "sha256": "14df0298c3f3619fe70de71ca7d6eb19ea4a229b73fe81ca40a99a74acbed6a5"
+    },
+    {
+      "path": "beads/drivers/leds.cc",
+      "sha256": "b8e28937c07b26528ea79befeb695d148e25d858165c9998129ff4214ba59738"
+    },
+    {
+      "path": "beads/drivers/leds.h",
+      "sha256": "c1d69ed106609e84226cacf0022926b59a50d1b0391ad0ec249c5c4087014e88"
+    },
+    {
+      "path": "beads/drivers/normalization_probe.h",
+      "sha256": "2d8741b9b2d1fb97b06a546f51d665d3d8f9b68141d4e287b3dbcc3867f98fbf"
+    },
+    {
+      "path": "beads/drivers/pins.h",
+      "sha256": "fbc67251b853380518090e93a1acb8c0bea6626fa0236914629f5150f20b9d35"
+    },
+    {
+      "path": "beads/drivers/pots_adc.cc",
+      "sha256": "2b34ddde309de5cdbfacbc437337bb041d6b6bfdd2441a209331a7416164008a"
+    },
+    {
+      "path": "beads/drivers/pots_adc.h",
+      "sha256": "0c2bf1ffabafacb2013a3de7061065648cb8ae44d88572ebfe94cbc56bebe8cc"
+    },
+    {
+      "path": "beads/drivers/seed_input.cc",
+      "sha256": "7ab19684d26e3bf75f74da56844b12dd8c105feebf19b05929b503b2f163db8d"
+    },
+    {
+      "path": "beads/drivers/seed_input.h",
+      "sha256": "24d90080ee2c23ce23c41371f3419303c1e7b8e8b8f22a7a699d7755675f3ebe"
+    },
+    {
+      "path": "beads/drivers/switches.cc",
+      "sha256": "787bb8ac7cb3f29dd288f695ec6a0d4b3f0b7956e3779d3e610736330336458b"
+    },
+    {
+      "path": "beads/drivers/switches.h",
+      "sha256": "ca74b85a9ab9cbf82e37e1ead1ca08a8021410702fa529fee1196094e2daf6d9"
+    },
+    {
+      "path": "beads/drivers/system.cc",
+      "sha256": "bc233255e42e081116b0fb7dc054bcb37e03f635a50157e22aa5891ce3dca5ea"
+    },
+    {
+      "path": "beads/drivers/system.h",
+      "sha256": "42a5931eb44e130998e3e43a7e5a9a448be2776070dd4e4886a5f1890c08588c"
+    },
+    {
+      "path": "beads/drivers/watchdog.h",
+      "sha256": "4dc380004187a17ce5cac6fff4f5cad5f955b820d782c7109cc0474f70654e72"
+    },
+    {
+      "path": "beads/dsp/delay_clock.cc",
+      "sha256": "a7f4bcd50e5544f27da9380cd8988b1d8b72d8329d1a7bdee692a7b1606dcee3"
+    },
+    {
+      "path": "beads/dsp/delay_clock.h",
+      "sha256": "f7c45b0b8505fcd3abf973ef938c8179bb15adc8612e5d9677cc30387efc8124"
+    },
+    {
+      "path": "beads/dsp/delay_controller.cc",
+      "sha256": "7893b105c34572bdb7bca2e6c08ce2be68cf3c7272c421afd1b3842631236ed7"
+    },
+    {
+      "path": "beads/dsp/delay_controller.h",
+      "sha256": "66c437e87a1874d2ad4f689526848e2f38484932576ae9d886aff43771fe61d6"
+    },
+    {
+      "path": "beads/dsp/delay_grain.h",
+      "sha256": "31bf347818a54406a5665ea156200d04197e628abb438f9c2383f37bfb93ef6c"
+    },
+    {
+      "path": "beads/dsp/delay_granular_player.h",
+      "sha256": "0d4f9701c430c19d1db1a36db4d63aefa168c675b87ce8b845fb742822120a70"
+    },
+    {
+      "path": "beads/dsp/delay_line.h",
+      "sha256": "3cc2594615519c5bda87a4718e61c6d8cc24a94d840f15d53e19ff68b1008e83"
+    },
+    {
+      "path": "beads/dsp/frame.h",
+      "sha256": "1bcde0345cad55f8fbb080d0594dcc19ff735947543ab226cdeba66db2a79302"
+    },
+    {
+      "path": "beads/dsp/fx/fx_engine.h",
+      "sha256": "68e8c2e6455e241a00d916a09d3f73be8702449cdb86143aa82b6219e7185513"
+    },
+    {
+      "path": "beads/dsp/fx/reverb.h",
+      "sha256": "fd37b7ce1ff499ad6cea45fde0217e11219006be233b403c4d54d20eb5465a6a"
+    },
+    {
+      "path": "beads/dsp/fx/wow_and_flutter.h",
+      "sha256": "97fbb09344c581bfed1ddfa77e767c03ea48eb10bdf48616acde1d6049a328a9"
+    },
+    {
+      "path": "beads/dsp/grain_envelope.h",
+      "sha256": "060d2ab2692b4498e362e283bd83357eada84f71a42f01c379658618b74679dc"
+    },
+    {
+      "path": "beads/dsp/grain.h",
+      "sha256": "d04b369f97dd10fb673448a1b7d1124f130862e9e703719ec549d620b5c4bc2d"
+    },
+    {
+      "path": "beads/dsp/granular_player.h",
+      "sha256": "97e7b6680b08d738af519700b2853ff845d928e383d287541116d4f64dc83e71"
+    },
+    {
+      "path": "beads/dsp/granular_processor.h",
+      "sha256": "0e99de3c67597ec08aaab6ddf49a0e5948df28fca21bb4f1a36c319939269e4e"
+    },
+    {
+      "path": "beads/dsp/limiter.h",
+      "sha256": "c589a0c818a12d2421068b0c55d9d2e1a5be67f9caa907ab1d44b80a46bfdd6a"
+    },
+    {
+      "path": "beads/dsp/modulated_parameter.h",
+      "sha256": "dfbe27564d0c0fece825f6305b7bdd78de72557b5f39bb5fc7579a2461785bd2"
+    },
+    {
+      "path": "beads/dsp/mu_law.cc",
+      "sha256": "67614c864a3789060836bb7ab208658bf55ffac69912c3600f060f090c747d8c"
+    },
+    {
+      "path": "beads/dsp/mu_law.h",
+      "sha256": "331eee3a3cc94fa8e9dd539c9cda13bbf7628d183bd5b85e3fcbba75d1559cae"
+    },
+    {
+      "path": "beads/dsp/multitap_delay.h",
+      "sha256": "3d92a32fb840628679b379479010c7cb4efec7db595a730cf4fd41e33b761c67"
+    },
+    {
+      "path": "beads/dsp/processor.cc",
+      "sha256": "9d3acbbc9828240def58a9866429cb12ba4deaf9537fce4ba15ef1dbe9380ec1"
+    },
+    {
+      "path": "beads/dsp/processor.h",
+      "sha256": "aaf1efb34883c926dd2fb9698d2e72323dc54605f817b7894ab25047bc2508e5"
+    },
+    {
+      "path": "beads/dsp/randomized_parameter.h",
+      "sha256": "120d95508ab8e8dd9ba9a2592409832f1890f24c001044397ec4b5bd5515d4dc"
+    },
+    {
+      "path": "beads/dsp/sample_rate_conversion_filters.h",
+      "sha256": "d802e732af772be766f2c0e04bf5f3a906a57ffdd547523a58f520cf1e85ccce"
+    },
+    {
+      "path": "beads/dsp/sine_oscillator.h",
+      "sha256": "3f9833b35c29020347a25243692ae430235e47bb09d4f887b99b35f413d83e64"
+    },
+    {
+      "path": "beads/dsp/synth.cc",
+      "sha256": "2244105032dcb2b3592a94348f50b96bfcfb64548db6e75ec88f8e413cd9b6cb"
+    },
+    {
+      "path": "beads/dsp/synth.h",
+      "sha256": "e7e354eb1b8982194b529b7dbc11df760e09ca2f17acf249b18ce3dfd9cf9808"
+    },
+    {
+      "path": "beads/dsp/tap.h",
+      "sha256": "74ff3494e07e477c335e07262813eaf687ce30d9a4b55dadefe0d767636a4226"
+    },
+    {
+      "path": "beads/dsp/trigger_generator.cc",
+      "sha256": "c2435554fd3b49f1e64bb344bc4847c569d4e6e50f3fffb8de68334bc0393964"
+    },
+    {
+      "path": "beads/dsp/trigger_generator.h",
+      "sha256": "6742a15825fc41986af7b13d8924baa069489274793bf516b41701b91df6fc2c"
+    },
+    {
+      "path": "beads/dsp/voice_stealing_envelope.h",
+      "sha256": "e3b4afe4359207e456ab4e8a4ba47351390137c709c70bd30cd0a9486800181e"
+    },
+    {
+      "path": "beads/dsp/wavetable_grain.h",
+      "sha256": "5d228f7197a70904da92e61d451d6e89ef15aa41c341de3f98a6056130d11db2"
+    },
+    {
+      "path": "beads/dsp/wavetable_granular_player.h",
+      "sha256": "ccf74e920eec69d521cfe960736ea953417e4d38014bc78a7bd6c8c143fd6ee0"
+    },
+    {
+      "path": "beads/dsp/wavetable_voice.h",
+      "sha256": "cd24cfba7542ad472f0ad5d82cd26bf683c1a78bfa7960a3bcd1876802864a65"
+    },
+    {
+      "path": "beads/factory_test.cc",
+      "sha256": "dbfdc17114c09ed3771e32168d7081bafeb9e1c1c6f83faa412a908a859268b3"
+    },
+    {
+      "path": "beads/factory_test.h",
+      "sha256": "81d4203a2acffb7f8ea3308698ef6413a8b498a05cd1db4f5c71298bbff7faca"
+    },
+    {
+      "path": "beads/gain_control.cc",
+      "sha256": "d0371f2b2bf8cbb14b4fd07086b96661f078552dfb1b7c24b65472825cf1c8e6"
+    },
+    {
+      "path": "beads/gain_control.h",
+      "sha256": "a3c91dae027e8055af874520a5557cc20f79c181f496e3e827ad8a2160f9bff9"
+    },
+    {
+      "path": "beads/makefile",
+      "sha256": "9cc5dc991a42f5f0d157ef69219c9aa7dea83d7c57d77db42215756fed66a500"
+    },
+    {
+      "path": "beads/normalization_detector.cc",
+      "sha256": "7f2cde32e5bb48cafbd99adbc46311aaa249560e727dc205aeb2dc3fcee3a807"
+    },
+    {
+      "path": "beads/normalization_detector.h",
+      "sha256": "145ebe020cd98672f2317fbc46ddc5f266ab4277dbc18726754d02cfbcb90dce"
+    },
+    {
+      "path": "beads/pot_controller.h",
+      "sha256": "30454060619e7ce8df4120ac34b25b0d3cdbf2706f3019fef195daafcd141893"
+    },
+    {
+      "path": "beads/resources.cc",
+      "sha256": "65bd67ca50cbed0b45939d0f02b4932964d211abc4723e58544676b9315618d7"
+    },
+    {
+      "path": "beads/resources.h",
+      "sha256": "82b77b6b9f069981fbff13d01f9e8a6e3a0d5dc510e1638dbb73d228a72e225b"
+    },
+    {
+      "path": "beads/resources/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "beads/resources/lookup_tables.py",
+      "sha256": "cb9fa6242b4e7a335ba0e4f7d43400c473ebb2e637c8b46bc9ba7eb86f9f923b"
+    },
+    {
+      "path": "beads/resources/resources.py",
+      "sha256": "c4e4765421c90a41ca36dd4be671ccee7ac2849584f46503b54202a395697d61"
+    },
+    {
+      "path": "beads/resources/waves.bin",
+      "sha256": "c672fccb061496d0229bfc5c2d55ec61f367e1539dda5870fd667a059c90f634"
+    },
+    {
+      "path": "beads/resources/wavetables.py",
+      "sha256": "6fe4b3b943af1913435582dcd5ae7615b44b301a26ed00670283c945010b9181"
+    },
+    {
+      "path": "beads/settings.cc",
+      "sha256": "22bd50c150eed436f57b2db3ebe7674abf27e11cdc8517baf1e582e930761895"
+    },
+    {
+      "path": "beads/settings.h",
+      "sha256": "2f8875507bca2a1c7c3ed6e95d5f88e61e05f460459e5db21bd1720ac0acd956"
+    },
+    {
+      "path": "beads/test/beads_test.cc",
+      "sha256": "66571f389643c62645417736325f933373898a5bca7bc8a6e0299c6499ceefa5"
+    },
+    {
+      "path": "beads/test/makefile",
+      "sha256": "f3e399007f3f726785af22a6c827af22179e68b41bf4d6abdf9a82343cf183c9"
+    },
+    {
+      "path": "beads/test/plot_distributions.py",
+      "sha256": "d84a9c4e0b915cf493f14c6f5d6f456e8c843b2226c6ec1f34148683f3afec60"
+    },
+    {
+      "path": "beads/tools/generate_src_filters.py",
+      "sha256": "0a1464d16a1600bd44e04235a955f8e1dd5c619f7a2ab40f699ee2d52b64b2d5"
+    },
+    {
+      "path": "beads/ui.cc",
+      "sha256": "8c008596102f5cae3898524a943f5b17d47316b4d8a85034e6f538270c6b491f"
+    },
+    {
+      "path": "beads/ui.h",
+      "sha256": "4c7949d789ac4783bc41ce99a2a9ba031462fe1dcfcdd6dd61abb2d7d133bf61"
+    },
+    {
+      "path": "stmlib/dsp/cosine_oscillator.h",
+      "sha256": "a7f6429e8bca85aa19ce91e3f1908fd7fb1fdf378a61fe2c87717a94d6f30a97"
+    },
+    {
+      "path": "stmlib/dsp/delay_line.h",
+      "sha256": "d6d1bb8e33dedf80bfca976ca1d544fc6ef01bcb1d71a45f3946a0682fd68dcb"
+    },
+    {
+      "path": "stmlib/dsp/dsp.h",
+      "sha256": "98b42900c4accbe9fbb2cfe2ec6fada024b57ec9a1becff008b0f35bd4fd8ddb"
+    },
+    {
+      "path": "stmlib/dsp/filter.h",
+      "sha256": "f4bbf97ac8dfdea255b8a37e179ba0286978c01a12ad8d3362eaa5862cf7c326"
+    },
+    {
+      "path": "stmlib/dsp/hysteresis_filter.h",
+      "sha256": "63631d89cd35139ed01870e0589681600d3ce4421a4f0577e1125cdfce29ef26"
+    },
+    {
+      "path": "stmlib/dsp/hysteresis_quantizer.h",
+      "sha256": "06032c1ec2e21cb7e904544f839a2a59b4c4a9f3f391918e6adfac7f68ecc243"
+    },
+    {
+      "path": "stmlib/dsp/parameter_interpolator.h",
+      "sha256": "4b05028c320e6946418a36e9662a4e5a142e5bfab0423835a77d074d9c7fc217"
+    },
+    {
+      "path": "stmlib/dsp/polyblep.h",
+      "sha256": "b36025a8a9b2e9a37156e45cfdee937451f788529089b51b9f490da1a5b0063b"
+    },
+    {
+      "path": "stmlib/dsp/sample_rate_converter.h",
+      "sha256": "18e1b8481c1887d9e3c30e0f9d1373ba156029695233628fc25868c897b55653"
+    },
+    {
+      "path": "stmlib/dsp/units.cc",
+      "sha256": "0acbe230ffaa2d181ba285fce54f2fd0b2339b3ec163a1dd00c946e6bf82ea4a"
+    },
+    {
+      "path": "stmlib/dsp/units.h",
+      "sha256": "70cf104c06f0e34ada90416f121417a13d17b6736116f0fc07063c1cd2084877"
+    },
+    {
+      "path": "stmlib/LICENSE",
+      "sha256": "6fde7600ac71ff9e4bdc28b642063d1a65e195f28bb07fb52a9b476efb5aa791"
+    },
+    {
+      "path": "stmlib/README.md",
+      "sha256": "caf5fefafc15b5cb0f70197c15401eb5b4a3d4ca1488b85bf1aa4a153c29d4eb"
+    },
+    {
+      "path": "stmlib/stmlib.h",
+      "sha256": "3afc8589a951e882d9eea16b3eda8623dd6fb0079dd11dfbce817e65be6cfba9"
+    },
+    {
+      "path": "stmlib/test/wav_writer.h",
+      "sha256": "da7db0bde90b79583175ae49ed1f9a28485b4e7bbf914045fe5d5bdc2957a9ea"
+    },
+    {
+      "path": "stmlib/third_party/STM/CMSIS/DSP_Lib/license.txt",
+      "sha256": "ac11e8d3c1c7966f76e0fabd467bde62b501418905b22eaa93fb205e4b2cfbe9"
+    },
+    {
+      "path": "stmlib/utils/dsp.h",
+      "sha256": "c0fad7f6b5b20f053d184614a35baf595e41f1394db53f80ac742d7467dbbe1b"
+    },
+    {
+      "path": "stmlib/utils/gate_flags.h",
+      "sha256": "548608ba37ee125903db4ba36507a678d1cdcdecddad30b11998b19d6ad00ca3"
+    },
+    {
+      "path": "stmlib/utils/random.cc",
+      "sha256": "145c4d7a30e373d001fd664ce6f97a475458f7dc8286252d24ca6f592e0cdb93"
+    },
+    {
+      "path": "stmlib/utils/random.h",
+      "sha256": "423f01e905fa279864878f34e42136ad1eb37a33dad58739affaaab06b793e5d"
+    }
+  ]
+}

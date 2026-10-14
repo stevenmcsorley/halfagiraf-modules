@@ -1,4 +1,5 @@
 RACK_DIR ?= ../Rack-SDK
+include grainloom.mk
 
 FLAGS +=
 CFLAGS +=
