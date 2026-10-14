@@ -96,10 +96,11 @@ struct Grainloom : Module {
     }
     c.densityCv = inputs[DENSITY_CV].getVoltage() * .2f;
     c.assignCv = inputs[ASSIGN_CV].getVoltage() * .2f * params[DEPTH].getValue();
-    c.assignment = int(params[ASSIGN].getValue());
+    c.assignment = int(grainloom::bounded(params[ASSIGN].getValue(), 0.f, 3.f));
     for (int i = 0; i < 3; ++i) c.assignDepth[i] = params[ASSIGN_FEEDBACK_DEPTH + i].getValue();
     c.feedback = params[FEEDBACK].getValue(); c.reverb = params[REVERB].getValue(); c.mix = params[MIX].getValue();
-    c.quality = int(params[QUALITY].getValue()); c.gain = int(params[GAIN].getValue());
+    c.quality = int(grainloom::bounded(params[QUALITY].getValue(), 0.f, 3.f));
+    c.gain = int(grainloom::bounded(params[GAIN].getValue(), 0.f, 255.f));
     c.freezeButton = params[FREEZE].getValue() > .5f; c.seedButton = params[SEED].getValue() > .5f;
     c.latchButton = params[LATCH].getValue() > .5f;
     c.seedConnected = inputs[SEED_GATE].isConnected();

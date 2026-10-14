@@ -83,7 +83,7 @@ jobs:
           msystem: MINGW64
           update: true
           install: >-
-            make tar unzip curl
+            make tar unzip curl diffutils
             mingw-w64-x86_64-gcc
             jq
             mingw-w64-x86_64-zstd
