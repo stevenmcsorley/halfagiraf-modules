@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/grainloom-beads-port
     tags:
       - "v*"
   pull_request:
@@ -26,6 +27,8 @@ jobs:
             g++ -std=c++11 -O2 -Wall -Wextra -pedantic "$source" -o "build/tests/$name"
             "build/tests/$name"
           done
+      - name: Beads reference and adapter tests
+        run: make -f grainloom.mk grainloom-test grainloom-upstream-test
 
   build-unix:
     name: ${{ matrix.platform }}

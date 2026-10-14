@@ -10,3 +10,4 @@ extern Model* modelBadSector;
 extern Model* modelMOD1;
 extern Model* modelEntwine;
 extern Model* modelConstellate;
+extern Model* modelGrainloom;

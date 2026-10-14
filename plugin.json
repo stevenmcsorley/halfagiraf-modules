@@ -1,7 +1,7 @@
 {
   "slug": "halfagiraf",
   "name": "halfagiraf Modules",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "license": "GPL-3.0-or-later",
   "brand": "halfagiraf",
   "author": "Steven McSorley",
@@ -42,6 +42,13 @@
       "description": "Four-channel relational event memory and generative trigger processor with transition-confidence CV.",
       "manualUrl": "https://github.com/stevenmcsorley/halfagiraf-modules/blob/main/docs/Constellate.md",
       "tags": ["Sequencer", "Random", "Clock", "Utility", "Visual"]
+    },
+    {
+      "slug": "Grainloom",
+      "name": "Grainloom",
+      "description": "Granular texture synthesizer based on the open-source Mutable Instruments Beads DSP.",
+      "manualUrl": "https://github.com/stevenmcsorley/halfagiraf-modules/blob/main/docs/Grainloom.md",
+      "tags": ["Granular", "Effect", "Synth voice", "Delay", "Reverb"]
     }
   ]
 }

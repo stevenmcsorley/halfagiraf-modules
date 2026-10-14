@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.0 (development)
+
+- Adds Grainloom, using the original open-source Beads granular, delay and wavetable DSP.
+- Adds host-rate conversion, original recording qualities, attenurandomizers and frozen recording snapshots.
+
 ## 2.0.2
 
 - Fixes Rack static-analysis findings in Entwine, Constellate, and Palimpsest support code.

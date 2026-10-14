@@ -23,6 +23,8 @@ grainloom-test:
 	$(GRAINLOOM_TEST_DIR)/adapter_test
 	$(CXX) $(BEADS_HOST_FLAGS) tests/grainloom/snapshot_test.cpp $(BEADS_HOST_SOURCES) -o $(GRAINLOOM_TEST_DIR)/snapshot_test
 	$(GRAINLOOM_TEST_DIR)/snapshot_test
+	$(CXX) $(BEADS_HOST_FLAGS) tests/grainloom/trigger_test.cpp $(BEADS_HOST_SOURCES) -o $(GRAINLOOM_TEST_DIR)/trigger_test
+	$(GRAINLOOM_TEST_DIR)/trigger_test
 	$(CXX) $(BEADS_HOST_FLAGS) tests/grainloom/reference_render.cpp $(BEADS_SOURCES) -o $(GRAINLOOM_TEST_DIR)/host_reference
 	$(CXX) $(BEADS_FLAGS) tests/grainloom/reference_render.cpp $(BEADS_SOURCES) -o $(GRAINLOOM_TEST_DIR)/upstream_reference
 	$(GRAINLOOM_TEST_DIR)/host_reference $(GRAINLOOM_TEST_DIR)/host.f32

@@ -32,6 +32,12 @@ Learns the relationships between four trigger streams, then uses that memory to 
 
 [Watch the 15-second Constellate demo](docs/Constellate-demo.mp4)
 
+### [Grainloom](docs/Grainloom.md)
+
+<p align="center"><img src="docs/Grainloom.png" width="420" alt="Grainloom in VCV Rack"/></p>
+
+Granular textures, frozen loops and wavetable voices, using Emilie Gillet's Beads DSP.
+
 ## Install
 
 The plugin is being reviewed for the VCV Library. In the meantime, platform builds are available from [GitHub Releases](https://github.com/stevenmcsorley/halfagiraf-modules/releases/latest).
