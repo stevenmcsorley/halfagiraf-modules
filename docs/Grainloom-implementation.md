@@ -112,6 +112,17 @@ Other module DSP and compiler flags are unchanged.
 - `make grainloom-test`: all 20 host-rate/media cases produce finite bounded
   audio, about 4000 blocks/second, and automatic ten-second synth transition.
 - 48 kHz bridge versus direct native Core: sample-identical after 12 frames.
+- Offline host-rate reference: all 20 media/rate cases compare the streaming
+  adapter with a batch native-Core renderer and independently evaluated
+  double-precision, exact-rational-phase sinc conversion. Control snapshots are
+  shared to isolate the audio adapter, not independently validate the UI mapping.
+  Inputs include stereo impulses, chirps, noise and percussion, with freeze.
+  Equal-rate cases are sample-identical. The largest Windows converted-path peak
+  error was 0.000115391 full scale; maximum RMS error was 0.0000112443. Assertions
+  require peak < 0.0002 and RMS < 0.00002, accounting for float accumulation,
+  fractional-phase table interpolation and original media quantization. These
+  tolerances do not permit changes to the native DSP, which has its own exact
+  pristine-source comparison.
 - Independent `reference_render.cpp` build against the pristine pinned upstream
   checkout equals the host render byte-for-byte across all four media, freeze,
   delay transition, reverb, randomisation and all twelve wavetable banks.
