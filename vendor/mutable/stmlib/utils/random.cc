@@ -31,6 +31,13 @@
 namespace stmlib {
 
 /* static */
+#ifdef GRAINLOOM_HOST
+uint32_t& Random::StateStorage() {
+  static thread_local uint32_t value = 0x21;
+  return value;
+}
+#else
 uint32_t Random::rng_state_ = 0x21;
+#endif
 
 }  // namespace stmlib

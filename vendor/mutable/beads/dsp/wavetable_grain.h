@@ -156,6 +156,8 @@ class WavetableGrain : public Grain {
 
     const float x0 = InterpolateWaveHermite(
         wave_start_, p_integral, p_fractional);
+    // The final waveform has no successor; a zero blend needs no second read.
+    if (wave_fractional_ == 0.0f) return x0;
     const float x1 = InterpolateWaveHermite(
         wave_start_ + kTableSize + 4, p_integral, p_fractional);
     

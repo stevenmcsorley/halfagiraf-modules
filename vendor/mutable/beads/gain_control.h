@@ -34,7 +34,12 @@
 
 #include "stmlib/stmlib.h"
 
+#ifdef GRAINLOOM_HOST
+// Only the codec's sample representation is needed by the original AGC.
+namespace beads { struct Codec { struct Frame { int32_t l; int32_t r; }; }; }
+#else
 #include "beads/drivers/codec.h"
+#endif
 #include "beads/dsp/frame.h"
 
 namespace beads {

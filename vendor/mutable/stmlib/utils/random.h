@@ -35,14 +35,29 @@ namespace stmlib {
 
 class Random {
  public:
-  static inline uint32_t state() { return rng_state_; }
+  static inline uint32_t state() {
+#ifdef GRAINLOOM_HOST
+    return StateStorage();
+#else
+    return rng_state_;
+#endif
+  }
 
   static inline void Seed(uint32_t seed) {
+#ifdef GRAINLOOM_HOST
+    StateStorage() = seed;
+#else
     rng_state_ = seed;
+#endif
   }
 
   static inline uint32_t GetWord() {
+#ifdef GRAINLOOM_HOST
+    uint32_t& value = StateStorage();
+    value = value * 1664525L + 1013904223L;
+#else
     rng_state_ = rng_state_ * 1664525L + 1013904223L;
+#endif
     return state();
   }
   
@@ -55,7 +70,11 @@ class Random {
   }
 
  private:
+#ifdef GRAINLOOM_HOST
+  static uint32_t& StateStorage();
+#else
   static uint32_t rng_state_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(Random);
 };

@@ -112,7 +112,7 @@ inline float SoftClip(float x) {
   }
 }
 
-#ifdef TEST
+#if defined(TEST) || defined(GRAINLOOM_HOST)
   inline int32_t Clip16(int32_t x) {
     if (x < -32768) {
       return -32768;
@@ -144,7 +144,7 @@ inline float SoftClip(float x) {
   }
 #endif
   
-#ifdef TEST
+#if defined(TEST) || defined(GRAINLOOM_HOST)
   inline float Sqrt(float x) {
     return sqrtf(x);
   }

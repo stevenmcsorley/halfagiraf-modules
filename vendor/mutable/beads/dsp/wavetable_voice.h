@@ -115,7 +115,7 @@ class WavetableVoice {
       MAKE_INTEGRAL_FRACTIONAL(p);
       const float x0 = InterpolateWaveHermite(
           wave_start, p_integral, p_fractional);
-      const float x1 = InterpolateWaveHermite(
+      const float x1 = wave_fractional == 0.0f ? x0 : InterpolateWaveHermite(
           wave_start + kTableSize + 4, p_integral, p_fractional);
       
       const float sample = x0 + (x1 - x0) * wave_fractional;

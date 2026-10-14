@@ -75,7 +75,7 @@ namespace impl {
 } // namespace impl
 
 
-#ifndef TEST
+#if !defined(TEST) && !defined(GRAINLOOM_HOST)
 #define IN_RAM __attribute__ ((section (".ramtext")))
 #else
 #define IN_RAM
