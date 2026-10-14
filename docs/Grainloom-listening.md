@@ -4,6 +4,11 @@ Human sign-off is pending. Automated finite-output checks are not listening appr
 The local files are in `build/grainloom/listening/`; the public repository contains
 the renderer, not the commercial vocal input or its derived audio.
 
+[Demo patch](patches/Grainloom-demo.vcv): VCO through Grainloom, two conservative
+8vert level controls and AUDIO-2. Choose your own audio driver/device in AUDIO-2.
+No user's device name is stored. Open as a separate patch; do not overwrite your
+existing work. Try TIME/SIZE, then FREEZE, followed by modest pitch randomization.
+
 There are nine fixtures, each with a dry input and four processed versions:
 drums, pad, transients, reverse grains, frozen texture, feedback, wavetable,
 vocals and clocked delay. Drums/pad/transients are deterministic generated sources.

@@ -1,0 +1,22 @@
+{
+  "version": "2.6.6",
+  "masterModuleId": 4,
+  "modules": [
+    {"id":1,"plugin":"Fundamental","model":"VCO","version":"2.6.4","pos":[0,0],"params":[{"id":2,"value":-12}]},
+    {"id":2,"plugin":"halfagiraf","model":"Grainloom","version":"2.1.0","pos":[10,0],"params":[
+      {"id":0,"value":0.32},{"id":1,"value":0},{"id":2,"value":0.7},{"id":3,"value":0.5},
+      {"id":4,"value":0.35},{"id":5,"value":0.08},{"id":6,"value":0.15},{"id":7,"value":0},
+      {"id":8,"value":0.15},{"id":9,"value":0.15},{"id":10,"value":0.4},{"id":11,"value":0.85},
+      {"id":15,"value":3},{"id":18,"value":64}
+    ],"data":{"version":1,"freeze":false,"seedLocked":true,"synthMode":false,"effectiveMedia":3}},
+    {"id":3,"plugin":"Fundamental","model":"8vert","version":"2.6.4","pos":[39,0],"params":[{"id":0,"value":0.12},{"id":1,"value":0.12}]},
+    {"id":4,"plugin":"Core","model":"AudioInterface2","version":"2.6.6","pos":[50,0],"params":[],"data":{}}
+  ],
+  "cables": [
+    {"id":11,"outputModuleId":1,"outputId":1,"inputModuleId":2,"inputId":6,"color":"#ffb437"},
+    {"id":12,"outputModuleId":2,"outputId":0,"inputModuleId":3,"inputId":0,"color":"#27b5c7"},
+    {"id":13,"outputModuleId":2,"outputId":1,"inputModuleId":3,"inputId":1,"color":"#e24891"},
+    {"id":14,"outputModuleId":3,"outputId":0,"inputModuleId":4,"inputId":0,"color":"#27b5c7"},
+    {"id":15,"outputModuleId":3,"outputId":1,"inputModuleId":4,"inputId":1,"color":"#e24891"}
+  ]
+}
