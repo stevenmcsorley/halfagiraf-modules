@@ -26,7 +26,7 @@ are not continually replaced by subsequent knob movements.
 
 ## Seed and recording
 
-SEED runs generation while held. Holding it for 1.5 seconds latches generation.
+SEED runs generation while held. Hold for four seconds, then release to latch.
 LATCH is a direct shortcut to the same latched state. Pressing SEED again clears
 the latch. Holding SEED while pressing FREEZE also latches generation.
 FREEZE toggles the recording freeze. Its gate input is ORed with that button state.
@@ -73,7 +73,7 @@ the firmware's +/-60-semitone input range. DENSITY and ASSIGN CV use 5 V per uni
 with +/-1 limits. Gate inputs use 1 V rising and 0.1 V falling thresholds.
 
 ASSIGN CV can modulate FEEDBACK, DRY / WET, REVERB or their combined assignment.
-DEST selects the destination; DEPTH scales incoming modulation. The combined
+ASSIGN selects the destination; DEPTH scales incoming modulation. The combined
 assignment starts with the firmware depths (feedback 1, mix 0, reverb 0.5).
 The context menu exposes independent depths for all three in this combined mode.
 
@@ -89,12 +89,17 @@ DENSITY controls subdivision. Frozen delay selects slices with TIME and shapes
 their envelope with SHAPE. Pitch shifting uses the original rotating-head playback.
 Lower SIZE again returns through the original crossfade to granular playback.
 
-After both audio inputs remain disconnected for ten seconds, the original internal
+After both audio inputs remain disconnected and the remaining output stays below
+0.01 full scale for ten seconds, the original internal
 wavetable synthesizer runs at 48 kHz. FEEDBACK selects a bank, TIME scans it, PITCH
 sets frequency and DRY / WET blends continuous and granular voices. The four
 quality settings retain the original oscillator/grain resolution differences.
 FREEZE preserves the original scan/grain freeze behaviour. Connecting audio returns
 to recording mode when not frozen.
+
+FREEZE and quality-transition mute restart this ten-second entry timer, as in the
+firmware. The LCD shows recorded stereo buffer data and its write head, not active
+grain positions or the processed output (except in wavetable mode).
 
 The released source contains twelve accessible banks, though the manual describes
 eight. Grainloom preserves all twelve, including the four FM banks in the source.

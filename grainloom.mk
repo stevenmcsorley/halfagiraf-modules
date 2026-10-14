@@ -11,6 +11,22 @@ BEADS_LAYOUT_FLAGS := -mno-ms-bitfields
 endif
 
 .PHONY: grainloom-rack-test
+.PHONY: grainloom-display-test grainloom-listening-render
+grainloom-display-test:
+	mkdir -p $(GRAINLOOM_TEST_DIR)
+	$(CXX) $(BEADS_HOST_FLAGS) tests/grainloom/display_test.cpp $(BEADS_HOST_SOURCES) -o $(GRAINLOOM_TEST_DIR)/display_test
+	$(GRAINLOOM_TEST_DIR)/display_test
+
+grainloom-listening-render:
+	mkdir -p $(GRAINLOOM_TEST_DIR)
+	$(CXX) $(BEADS_HOST_FLAGS) tests/grainloom/listening_render.cpp $(BEADS_HOST_SOURCES) -o $(GRAINLOOM_TEST_DIR)/listening_render
+
+.PHONY: grainloom-acceptance-rack
+grainloom-acceptance-rack:
+	mkdir -p $(GRAINLOOM_TEST_DIR)
+	$(CXX) $(BEADS_HOST_FLAGS) -I$(RACK_DIR)/include -I$(RACK_DIR)/dep/include tests/grainloom/acceptance_rack.cpp $(BEADS_HOST_SOURCES) -L$(RACK_DIR) -lRack -o $(GRAINLOOM_TEST_DIR)/acceptance_rack
+	$(GRAINLOOM_TEST_DIR)/acceptance_rack
+
 grainloom-rack-test:
 	mkdir -p $(GRAINLOOM_TEST_DIR)
 	$(CXX) $(BEADS_HOST_FLAGS) -I$(RACK_DIR)/include -I$(RACK_DIR)/dep/include tests/grainloom/rack_module_test.cpp $(BEADS_HOST_SOURCES) -L$(RACK_DIR) -lRack -o $(GRAINLOOM_TEST_DIR)/rack_module_test

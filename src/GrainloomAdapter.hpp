@@ -75,12 +75,12 @@ public:
     previousGateIndex_ = -1;
   }
   Resampler::Frame process(float left, float right, float seedVoltage, float freezeVoltage) {
-    // Button semantics from Ui::OnSwitchPressed/Released; a 1.5 s hold latches.
+    // Firmware latches SEED on release after four seconds, not while held.
     if (controls.seedButton && !previousSeedButton_) { seedLocked_ = false; heldSeconds_ = 0.0; }
     if (controls.seedButton) {
       heldSeconds_ += 1.0 / hostRate_;
-      if (heldSeconds_ >= 1.5) seedLocked_ = true;
     }
+    if (!controls.seedButton && previousSeedButton_ && heldSeconds_ >= 4.0) seedLocked_ = true;
     if (controls.latchButton && !previousLatchButton_) seedLocked_ = true;
     if (controls.freezeButton && !previousFreezeButton_) {
       if (controls.seedButton) seedLocked_ = true;
@@ -97,10 +97,11 @@ public:
     bool requestedMono = !controls.leftConnected || !controls.rightConnected;
     bool desiredSynth = core.synthMode();
     if (hasAudio) { disconnectedSeconds_ = 0.0; desiredSynth = false; }
-    else if (!frozen_) {
+    else if (!frozen_ && blankSamples_ <= 0) {
       disconnectedSeconds_ += 1.0 / hostRate_;
       if (disconnectedSeconds_ >= 10.0) desiredSynth = true;
     }
+    if (frozen_ || blankSamples_ > 0) disconnectedSeconds_ = 0.0;
     int quality = std::max(0, std::min(3, controls.quality));
     if (!frozen_ && (quality != core.media() || (hasAudio && requestedMono != core.mono()) || desiredSynth != core.synthMode())) {
       bool resetGain = requestedMono != core.mono() || desiredSynth != core.synthMode();
@@ -155,6 +156,13 @@ public:
         mapControls();
         core.process(inputBlock_.data(), seedBlock_.data(), freezeBlock_.data(), outputBlock_.data(), blankSamples_ <= 0);
         int n = core.blockSize();
+        // Process() in the firmware restarts the ten-second synth-entry timer
+        // whenever the rendered tail exceeds 0.01 full scale on either channel.
+        if (!core.synthMode()) {
+          for (int i = 0; i < n; ++i)
+            if (std::fabs(outputBlock_[i].l) > .01f || std::fabs(outputBlock_[i].r) > .01f)
+              disconnectedSeconds_ = 0.0;
+        }
         blockFrozen_ = true;
         for (int i = 0; i < n; ++i) blockFrozen_ = blockFrozen_ && freezeBlock_[i];
         for (int i = 0; i < n; ++i) {

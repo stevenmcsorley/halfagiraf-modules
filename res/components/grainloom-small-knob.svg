@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="23.622048" height="23.622048" viewBox="0 0 8 8">
+<defs><linearGradient id="rim" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#858986"/><stop offset=".4" stop-color="#262a2b"/><stop offset="1" stop-color="#030405"/></linearGradient><radialGradient id="cap" cx="30%" cy="20%" r="85%"><stop stop-color="#404445"/><stop offset=".5" stop-color="#242728"/><stop offset="1" stop-color="#101213"/></radialGradient></defs>
+<circle cx="4" cy="4" r="3.88" fill="#050607"/>
+<circle cx="4" cy="4" r="3.64" fill="url(#rim)"/>
+<circle cx="4" cy="4" r="3.36" fill="url(#cap)" stroke="#080a0b" stroke-width="0.144"/>
+<path d="M4 0.84V3.44" stroke="#63e3ed" stroke-width="0.36" stroke-linecap="round"/>
+</svg>

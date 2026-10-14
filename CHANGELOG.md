@@ -4,6 +4,8 @@
 
 - Adds Grainloom, using the original open-source Beads granular, delay and wavetable DSP.
 - Adds host-rate conversion, original recording qualities, attenurandomizers and frozen recording snapshots.
+- Adds the graphite/cyan panel and live stereo recording overview.
+- Matches the firmware's four-second SEED release latch and quiet-tail wavetable entry.
 
 ## 2.0.2
 

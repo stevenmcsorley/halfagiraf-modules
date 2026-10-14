@@ -44,9 +44,10 @@ int main() {
   a->controls.leftConnected = a->controls.rightConnected = true;
   a->controls.seedButton = true;
   a->process(0, 0, 0, 0); assert(!a->seedLocked());
-  for (int i = 0; i < 73000; ++i) a->process(0, 0, 0, 0);
-  assert(a->seedLocked());
+  for (int i = 0; i < 192100; ++i) a->process(0, 0, 0, 0);
+  assert(!a->seedLocked());
   a->controls.seedButton = false; a->process(0, 0, 0, 0);
+  assert(a->seedLocked());
   a->controls.seedButton = true; a->process(0, 0, 0, 0); assert(!a->seedLocked());
   a->controls.freezeButton = true; a->process(0, 0, 0, 0); assert(a->seedLocked());
   a->controls.seedButton = a->controls.freezeButton = false; a->process(0, 0, 0, 0);
@@ -55,4 +56,17 @@ int main() {
   for (int i = 0; i < 2400; ++i) a->process(0, 0, 0, 0);
   assert(a->core.media() == media);
   std::cout << "SEED hold, latch combination and frozen quality restrictions pass\n";
+  a->reset();
+  a->controls = grainloom::Controls{};
+  a->controls.mix = 0.f; a->controls.reverb = 0.f;
+  for(int i=0;i<48000*8;++i)a->process(0,0,0,0);
+  assert(!a->core.synthMode());
+  a->setFreeze(true);
+  for(int i=0;i<48000*3;++i)a->process(0,0,0,0);
+  a->setFreeze(false);
+  for(int i=0;i<48000*2;++i)a->process(0,0,0,0);
+  assert(!a->core.synthMode());
+  for(int i=0;i<48000*9;++i)a->process(0,0,0,0);
+  assert(a->core.synthMode());
+  std::cout << "Freeze restarts the firmware synth-entry timer pass\n";
 }

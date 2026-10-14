@@ -63,6 +63,14 @@ public:
     return frames[media()] * (mono() ? 2 : 1);
   }
   uint8_t* buffer() { return buffer_.data(); }
+  // Display-only read of the native recording format, on the engine thread.
+  // Uses the original item decoder and bank packing; never changes DSP state.
+  beads::FloatFrame displaySample(int frame) const {
+    frame = std::max(0, std::min(maxFrames() - 1, frame));
+    if (media() == 3) return mono() ? displayItem<beads::RESOLUTION_16_BIT, 1>(frame) : displayItem<beads::RESOLUTION_16_BIT, 2>(frame);
+    if (media() == 0) return mono() ? displayItem<beads::RESOLUTION_8_BIT, 1>(frame) : displayItem<beads::RESOLUTION_8_BIT, 2>(frame);
+    return mono() ? displayItem<beads::RESOLUTION_12_BIT, 1>(frame) : displayItem<beads::RESOLUTION_12_BIT, 2>(frame);
+  }
   bool gainAdjusting() const { return gain_.adjusting(); }
   float inputMeter() const { return gain_.vu_meter() / 255.f; }
   void restartGain() { gain_.Restart(); }
@@ -119,6 +127,16 @@ public:
     }
   }
 private:
+  template<beads::Resolution resolution, int channels>
+  beads::FloatFrame displayItem(int frame) const {
+    using Item = beads::Item<resolution, channels>;
+    const int itemsPerBank = bankBytes / int(sizeof(Item));
+    int item = frame / Item::bundle_size;
+    int offset = (item / itemsPerBank) * bankBytes + (item % itemsPerBank) * int(sizeof(Item));
+    Item value;
+    std::memcpy(&value, buffer_.data() + offset, sizeof(Item));
+    return value.value(frame % Item::bundle_size);
+  }
   alignas(16) std::array<uint8_t, bufferBytes> buffer_{};
   alignas(16) std::array<uint16_t, 32768> reverb_{};
   beads::Processor processor_;

@@ -22,6 +22,13 @@ int main() {
     a->inputs[Grainloom::AUDIO_R].setVoltage(2.f * std::sin(i * .039f));
     a->process(args);
   }
+  float leftPeak = 0.f, rightPeak = 0.f;
+  for (int i = 0; i < Grainloom::displayColumns; ++i) {
+    leftPeak = std::max(leftPeak, a->uiWaveMax[i].load());
+    rightPeak = std::max(rightPeak, a->uiWaveMaxRight[i].load());
+  }
+  assert(leftPeak > .01f && rightPeak > .01f);
+  assert(a->uiBufferSeconds.load() == 4.f);
   a->params[Grainloom::FREEZE].setValue(1.f); a->process(args);
   a->params[Grainloom::FREEZE].setValue(0.f);
   for (int i = 0; i < 24; ++i) a->process(args);
