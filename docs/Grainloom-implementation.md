@@ -69,7 +69,7 @@ Their phase relative to input conversion is a documented host difference.
 Snapshots use three preallocated ownership slots, acquired with atomic compare
 and exchange. The first fully frozen DSP block makes one fixed 786432-byte copy
 before publishing its saved state. The largest observed copy in the local
-100-freeze test was 29.5 microseconds; this is not a universal worst-case bound.
+100-freeze test was 30.2 microseconds; this is not a universal worst-case bound.
 Serialization pins an immutable slot with an atomic reader count and performs
 base64/CRC/JSON on the caller thread. Restore validates exact lengths, format,
 media, mono flag, write range and CRC before queuing. The engine restores 4096
@@ -99,6 +99,15 @@ reverb state are intentionally restarted, matching the scope of hardware backup.
 - MinGW compiles only Grainloom and its imported sources with `-mno-ms-bitfields`;
   native 12-bit stereo and mono bundle sizes are asserted as 3 bytes. Without it,
   Windows used 4-byte storage and crashed in vintage/tape processing.
+- Host builds explicitly use `-ffp-contract=off`. Apple Silicon's implicit fused
+  evaluation initially caused an isolated cassette-mode peak error of 0.00074333
+  in the exact-phase offline reference test; RMS error was 0.0000032331. Explicit
+  unfused evaluation passed the unchanged peak/RMS limits on every architecture.
+  This is a numerical-portability policy, not proof of hardware instruction parity.
+  The pinned firmware targets STM32H7/Cortex-M7 at 400 MHz (the title of commit
+  `da488e7` incorrectly says Cortex-M4). Its original compiler/FPU rounding and
+  analog codec have not been reproduced or measured. Fused versus unfused
+  rounding can move a sample across an original media quantizer's threshold.
 
 Original hashes remain in provenance.json; git diffs identify the host patches.
 Other module DSP and compiler flags are unchanged.
@@ -162,10 +171,14 @@ and double-speed interpolation/envelope checks and 32-voice stealing tests pass.
 
 ## Acceptance work still outstanding
 
-The initial feature CI built packages for Windows x64, Linux x64, macOS Intel and
-Apple Silicon successfully (run 38529160264). Updated feature validation adds
-native adapter tests on every build architecture and the longer stress suite.
-Its final result must be checked before using the latest packages.
+Final code CI [run 38576656901](https://github.com/stevenmcsorley/halfagiraf-modules/actions/runs/38576656901)
+passed for Windows x64, Linux x64, macOS Intel and Apple Silicon at `da488e7`.
+Every platform ran the native adapter, buffer, grain, trigger and rate-reference
+tests before packaging. Linux also passed pristine-source comparison, original
+render routines, ten existing suites, stress and address/undefined sanitizers.
+Downloaded packages have the correct binary architecture, manifest, panel and
+licences. The actual Windows CI package loaded and rendered Grainloom in Rack
+using a separate user directory, then exited normally.
 
 Recorded drum-loop/spoken-word comparisons, extended human audition, and
 full hardware control/analog measurements remain. The included screenshot was
