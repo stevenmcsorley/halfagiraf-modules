@@ -105,6 +105,7 @@ static void compare(int hostRate, int media) {
     }
   }
   double maximum = 0., squared = 0., energy = 0.;
+  int peakSample = 0;
   for (int i = 0; i < length; ++i) {
     double timestamp = double(i) * nativeRate / hostRate - blockSize - (native ? 0. : 64.);
     Frame expected;
@@ -113,11 +114,12 @@ static void compare(int hostRate, int media) {
     expected.l = grainloom::bounded(expected.l, -1.f, .999999f);
     expected.r = grainloom::bounded(expected.r, -1.f, .999999f);
     double dl = actual[i].l - expected.l, dr = actual[i].r - expected.r;
-    maximum = std::max(maximum, std::max(std::fabs(dl), std::fabs(dr)));
+    double difference = std::max(std::fabs(dl), std::fabs(dr));
+    if (difference > maximum) { maximum = difference; peakSample = i; }
     squared += dl * dl + dr * dr; energy += expected.l * expected.l + expected.r * expected.r;
   }
   double rms = std::sqrt(squared / (2. * length));
-  std::cout << "Offline reference " << hostRate << " media " << media << " peak error=" << maximum << " RMS=" << rms << "\n";
+  std::cout << "Offline reference " << hostRate << " media " << media << " peak error=" << maximum << " RMS=" << rms << " peak sample=" << peakSample << "\n";
   assert(energy > 1.);
   // Tolerance is for finite polyphase table interpolation and float accumulation,
   // not a licence to replace or retune DSP algorithms. Native audio must be exact.

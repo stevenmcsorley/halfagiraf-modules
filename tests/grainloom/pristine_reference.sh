@@ -23,7 +23,7 @@ flags=()
 case "$target" in *mingw*) flags+=(-mno-ms-bitfields);; esac
 output="build/grainloom/$target"
 mkdir -p "$output"
-"$compiler" -std=c++11 -O2 -DTEST -D_USE_MATH_DEFINES -include cstdio \
+"$compiler" -std=c++11 -O2 -ffp-contract=off -DTEST -D_USE_MATH_DEFINES -include cstdio \
   -Wno-unused-local-typedefs -Wno-sign-compare "${flags[@]}" -I"$root" \
   tests/grainloom/reference_render.cpp "$root"/beads/dsp/*.cc \
   "$root/beads/resources.cc" "$root/stmlib/utils/random.cc" \
