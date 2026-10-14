@@ -4,6 +4,12 @@ Grainloom records audio and weaves it into grains, loops and evolving textures.
 It uses Emilie Gillet's original open-source Mutable Instruments Beads DSP.
 The halfagiraf panel is an original 28 HP design.
 
+[Download](https://github.com/stevenmcsorley/halfagiraf-modules/releases/latest) ·
+[Demo patch](patches/Grainloom-demo.vcv)
+
+Requires Rack 2.6.6 or newer. The demo uses Fundamental VCO and 8vert plus AUDIO-2.
+Select your own audio driver/device in AUDIO-2 and start at a low listening level.
+
 ![Grainloom panel rendered in Rack](Grainloom.png)
 
 ## Grain controls
@@ -141,10 +147,11 @@ The 250 ms media transition mute follows codec restart behaviour.
 Native DSP renders have been compared byte-for-byte against the pinned upstream
 source. Host-rate matrix, buffer snapshot and actual Rack module tests are present.
 Pitch, trigger regimes, a ten-minute modulated stress run, concurrent instances
-and snapshot readers have passed automated tests. Hardware measurements and
-extended musical audition remain outstanding; these checks do not certify
-every hardware interaction or analog conversion characteristic.
-This feature branch is under validation; it is not a published VCV Library release.
+and snapshot readers have passed automated tests. These checks do not certify
+hardware-identical analog response or every physical control interaction.
+Physical Beads and Mac desktop measurements have not been performed.
+See the [control audit](Grainloom-control-audit.md) and
+[acceptance record](Grainloom-acceptance.md) for the exact scope of verification.
 
 Source and attribution: [Beads](https://github.com/pichenettes/eurorack/tree/d8f473915232af74347762b6365202bfd26f73f6/beads),
 [official manual](https://pichenettes.github.io/mutable-instruments-documentation/modules/beads/manual/),

@@ -7,6 +7,21 @@ completed successfully. No merge, tag, public release or Library submission.
 
 ## Verdict
 
+### Maintainer release decision
+
+After local testing, the maintainer approved the 2.1.0 public release on
+14 October 2026. This is a release decision, not a new measured hardware comparison
+or a completed per-fixture listening survey. Earlier control-response concerns
+are not erased by that approval. A subsequent isolated Rack-linked probe found
+small primary-control steps reach DSP state in approximately 19-31 ms; this is
+not a measurement of perceptual equivalence. The exact tested code remains
+`b1d2a23`; subsequent release preparation changes documentation only.
+
+The release contains the four published modules plus Grainloom. Myriad stays
+in its separate uncommitted worktree and is not changed or included.
+
+### Original acceptance verdict
+
 **GO for release-candidate audition; NO-GO for unconditional production sign-off.**
 The automated checks below pass. Human listening, Mac desktop checks and the
 bundle choice remain outstanding. No physical Beads hardware was available.

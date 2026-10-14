@@ -40,7 +40,18 @@ Granular textures, frozen loops and wavetable voices, using Emilie Gillet's Bead
 
 ## Install
 
-The plugin is being reviewed for the VCV Library. In the meantime, platform builds are available from [GitHub Releases](https://github.com/stevenmcsorley/halfagiraf-modules/releases/latest).
+Download the package for Windows x64, Linux x64, macOS Intel or Apple Silicon from
+[GitHub Releases](https://github.com/stevenmcsorley/halfagiraf-modules/releases/latest).
+Requires Rack 2.6.6 or newer.
+
+Close Rack, open its user folder and copy the `.vcvplugin` into the matching
+`plugins-win-x64`, `plugins-lin-x64`, `plugins-mac-x64` or
+`plugins-mac-arm64` directory. Start Rack again and search for **Grainloom**.
+
+[Grainloom manual](docs/Grainloom.md) · [Example patch](docs/patches/Grainloom-demo.vcv)
+
+The VCV Library update may arrive later than the GitHub release. Library
+subscription filters can hide a new module until that update is available.
 
 ## Build
 
@@ -54,4 +65,6 @@ make dist
 
 ## License
 
-GPL-3.0-or-later. Panel artwork © halfagiraf. Attribution notes are included in the module manuals.
+GPL-3.0-or-later. Panel artwork © halfagiraf. Grainloom uses Emilie Gillet's
+Mutable Instruments Beads DSP and stmlib under their original MIT licences.
+See [attribution](LICENSE-Beads.txt) and the module manuals.

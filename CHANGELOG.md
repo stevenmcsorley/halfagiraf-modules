@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.1.0 (development)
+## 2.1.0 — 14 October 2026
 
 - Adds Grainloom, using the original open-source Beads granular, delay and wavetable DSP.
 - Adds host-rate conversion, original recording qualities, attenurandomizers and frozen recording snapshots.
