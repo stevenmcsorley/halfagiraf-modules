@@ -54,6 +54,11 @@ No rate converter is allocated on the callback. Host-rate changes reset only the
 bridge; original media changes reset the selected DSP configuration as in firmware.
 Equal rates bypass conversion. CV mapping follows `beads.cc`, `cv_reader.h` and
 settings calibration constants; hardware ADC/noise/probe circuitry is omitted.
+Rate changes preserve Schmitt gate state and supply the held state while new
+resampling history fills. A five-rate regression test verifies that a frozen
+recording and write pointer are unchanged, even with gates between thresholds.
+The released firmware disables `ENABLE_ADVANCED_FEATURES`; its experimental
+monophonic-grain and trim combinations are therefore not exposed as hardware modes.
 
 The bridge samples pots/CV at 4 kHz, supplies the original per-sample freeze and
 gate arrays and preserves the 2.5 ms SEED input delay. Its non-native audio/gate
@@ -120,7 +125,9 @@ Other module DSP and compiler flags are unchanged.
 - SRC test: 1 kHz passband vs 17 kHz stopband while converting to 24 kHz,
   measured rejection 75.4-110.0 dB over the five required host rates.
 - Snapshot test: all eight quality/channel combinations restore exact bytes;
-  malformed base64 and CRC checks are exercised.
+  malformed base64 and CRC checks, multiple readers and newest-queued-state
+  selection are exercised. All eight recording capacities wrap correctly over
+  two full cycles and stop recording without changing their audio when frozen.
 - Rack-linked Windows test: creation, DSP, immediate freeze saving, queued/partial
   restore re-saving, JSON reload, corrupted-checksum rejection, reset, frozen
   synth restoration, right-output gates and extreme feedback pass.

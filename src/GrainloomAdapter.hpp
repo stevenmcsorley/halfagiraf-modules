@@ -59,6 +59,7 @@ public:
     disconnectedSeconds_ = heldSeconds_ = 0.;
     frozen_ = freezeLatched_ = false; seedLocked_ = true;
     previousSeedButton_ = previousFreezeButton_ = previousLatchButton_ = false;
+    previousSeedVoltage_ = previousFreezeVoltage_ = false;
     blankSamples_ = 0; blocks_ = 0;
     resetBridge();
   }
@@ -70,7 +71,6 @@ public:
     blockFill_ = 0;
     gates_.fill(Gates());
     gateTags_.fill(-1);
-    previousSeedVoltage_ = previousFreezeVoltage_ = false;
     blockFrozen_ = false;
     previousGateIndex_ = -1;
   }
@@ -128,6 +128,12 @@ public:
       Resampler::Frame resampled = native ? inputSrc_[converter_].get(internalIndex_) : inputSrc_[converter_].at(sourceTime - 64.0);
       int64_t gateIndex = int64_t(std::floor(sourceTime - (native ? 0.0 : 64.0)));
       Gates state;
+      // A new SRC history must not unfreeze a held/frozen recording or create
+      // a falling/rising SEED pair while the host changes sample rate.
+      if (gateIndex < 0) {
+        state.seed = previousSeedVoltage_;
+        state.freeze = frozen_;
+      }
       int gs = int(gateIndex & (Resampler::capacity - 1));
       if (gateIndex >= 0 && gateTags_[gs] == gateIndex) state = gates_[gs];
       // Preserve a host trigger narrower than one internal sample interval.

@@ -78,6 +78,26 @@ static void nativeAdapterParity() {
   std::cout << "48 kHz adapter versus direct original-domain DSP: sample-identical after 12 frames\n";
 }
 
+static void frozenRateChanges() {
+  std::unique_ptr<grainloom::Adapter> a(new grainloom::Adapter());
+  a->controls.leftConnected = a->controls.rightConnected = true;
+  for (int i = 0; i < 48000; ++i) a->process(.2f * std::sin(i * .04f), .13f, 0.f, 0.f);
+  // Test external gates, including a voltage between the Schmitt thresholds.
+  a->process(0.f, 0.f, 10.f, 10.f);
+  for (int i = 0; i < 4800; ++i) a->process(0.f, 0.f, .5f, .5f);
+  assert(a->frozen());
+  std::unique_ptr<uint8_t[]> saved(new uint8_t[grainloom::Core::bufferBytes]);
+  std::memcpy(saved.get(), a->core.buffer(), grainloom::Core::bufferBytes);
+  int pointer = a->core.writePointer();
+  for (double rate : {44100., 48000., 88200., 96000., 192000.}) {
+    a->setHostRate(rate);
+    for (int i = 0; i < int(rate * .02); ++i) a->process(0.f, 0.f, .5f, .5f);
+    assert(a->frozen() && a->core.writePointer() == pointer);
+    assert(std::memcmp(saved.get(), a->core.buffer(), grainloom::Core::bufferBytes - 2048) == 0);
+  }
+  std::cout << "Host rate changes preserve frozen audio and held Schmitt gate state\n";
+}
+
 int main() {
   std::cout << "Packed 12-bit stereo bytes=" << sizeof(beads::Item<beads::RESOLUTION_12_BIT, 2>) << std::endl;
   assert(sizeof(beads::Item<beads::RESOLUTION_12_BIT, 2>) == 3);
@@ -97,6 +117,7 @@ int main() {
   resamplerTest();
   directParity();
   nativeAdapterParity();
+  frozenRateChanges();
   auto start = std::chrono::steady_clock::now();
   std::unique_ptr<grainloom::Adapter> adapter(new grainloom::Adapter());
   for (double rate : {44100., 48000., 88200., 96000., 192000.}) {
