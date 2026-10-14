@@ -25,27 +25,53 @@ class Adapter {
 public:
   Core core;
   Controls controls;
-  Adapter() { setHostRate(48000.0); }
+  Adapter() { timeHysteresis_.Init(.001f); setHostRate(48000.0); }
   void setHostRate(double rate) {
     hostRate_ = std::max(8000.0, std::min(384000.0, std::isfinite(rate) ? rate : 48000.0));
+    if (!kernelsReady_ || kernelHostRate_ != hostRate_) {
+      const int rates[3] = {24000, 32000, 48000};
+      for (int i = 0; i < 3; ++i) {
+        inputSrc_[i].configure(hostRate_, rates[i]);
+        outputSrc_[i].configure(rates[i], hostRate_);
+      }
+      kernelsReady_ = true;
+      kernelHostRate_ = hostRate_;
+    }
     resetBridge();
   }
   double hostRate() const { return hostRate_; }
   bool frozen() const { return frozen_; }
+  bool blockFrozen() const { return blockFrozen_; }
   bool seedLocked() const { return seedLocked_; }
   void setSeedLocked(bool locked) { seedLocked_ = locked; }
   double latencySeconds() const {
     return (hostRate_ == core.rate() ? 0.0 : 64.0 / hostRate_ + 64.0 / core.rate()) + core.blockSize() / double(core.rate());
   }
   uint64_t renderedBlocks() const { return blocks_; }
+  void reset() {
+    core.reset();
+    timeHysteresis_.Init(.001f);
+    const float defaults[4] = {0.f, 0.f, .65f, .5f};
+    for (int i = 0; i < 4; ++i) {
+      smoothedBase_[i] = defaults[i]; smoothedRandom_[i] = smoothedCv_[i] = 0.f;
+    }
+    smoothedDensity_ = .3f; assignCv_ = 0.f;
+    disconnectedSeconds_ = heldSeconds_ = 0.;
+    frozen_ = freezeLatched_ = false; seedLocked_ = true;
+    previousSeedButton_ = previousFreezeButton_ = previousLatchButton_ = false;
+    blankSamples_ = 0; blocks_ = 0;
+    resetBridge();
+  }
   void resetBridge() {
-    inputSrc_.configure(hostRate_, core.rate());
-    outputSrc_.configure(core.rate(), hostRate_);
+    converter_ = core.rate() == 24000 ? 0 : core.rate() == 32000 ? 1 : 2;
+    inputSrc_[converter_].reset();
+    outputSrc_[converter_].reset();
     hostIndex_ = internalIndex_ = 0;
     blockFill_ = 0;
     gates_.fill(Gates());
     gateTags_.fill(-1);
     previousSeedVoltage_ = previousFreezeVoltage_ = false;
+    blockFrozen_ = false;
     previousGateIndex_ = -1;
   }
   Resampler::Frame process(float left, float right, float seedVoltage, float freezeVoltage) {
@@ -87,7 +113,7 @@ public:
     Resampler::Frame input;
     input.l = bounded(left, -1.f, .999999f);
     input.r = bounded(right, -1.f, .999999f);
-    inputSrc_.push(hostIndex_, input);
+    inputSrc_[converter_].push(hostIndex_, input);
     int slot = int(hostIndex_ & (Resampler::capacity - 1));
     Gates gate;
     gate.seed = previousSeedVoltage_;
@@ -99,7 +125,7 @@ public:
     while (internalIndex_ <= int64_t(std::floor(internalTime + 1e-9))) {
       double sourceTime = internalIndex_ * (hostRate_ / core.rate());
       bool native = hostRate_ == core.rate();
-      Resampler::Frame resampled = native ? inputSrc_.get(internalIndex_) : inputSrc_.at(sourceTime - 64.0);
+      Resampler::Frame resampled = native ? inputSrc_[converter_].get(internalIndex_) : inputSrc_[converter_].at(sourceTime - 64.0);
       int64_t gateIndex = int64_t(std::floor(sourceTime - (native ? 0.0 : 64.0)));
       Gates state;
       int gs = int(gateIndex & (Resampler::capacity - 1));
@@ -121,12 +147,14 @@ public:
       ++internalIndex_;
       if (blockFill_ == core.blockSize()) {
         mapControls();
-        core.process(inputBlock_.data(), seedBlock_.data(), freezeBlock_.data(), outputBlock_.data());
+        core.process(inputBlock_.data(), seedBlock_.data(), freezeBlock_.data(), outputBlock_.data(), blankSamples_ <= 0);
         int n = core.blockSize();
+        blockFrozen_ = true;
+        for (int i = 0; i < n; ++i) blockFrozen_ = blockFrozen_ && freezeBlock_[i];
         for (int i = 0; i < n; ++i) {
           Resampler::Frame frame;
           frame.l = outputBlock_[i].l; frame.r = outputBlock_[i].r;
-          outputSrc_.push(internalIndex_ - n + i, frame);
+          outputSrc_[converter_].push(internalIndex_ - n + i, frame);
         }
         blockFill_ = 0;
         ++blocks_;
@@ -134,7 +162,7 @@ public:
     }
     bool native = hostRate_ == core.rate();
     double outputTime = internalTime - core.blockSize() - (native ? 0.0 : 64.0);
-    Resampler::Frame out = native ? outputSrc_.get(int64_t(outputTime)) : outputSrc_.at(outputTime);
+    Resampler::Frame out = native ? outputSrc_[converter_].get(int64_t(outputTime)) : outputSrc_[converter_].at(outputTime);
     ++hostIndex_;
     if (blankSamples_ > 0) { --blankSamples_; return Resampler::Frame(); }
     out.l = bounded(out.l, -1.f, .999999f);
@@ -165,6 +193,10 @@ private:
       smoothedBase_[i] += .05f * (base[i] - smoothedBase_[i]);
       smoothedRandom_[i] += .05f * (attenurandomizer(controls.random[i]) - smoothedRandom_[i]);
       p[i]->base = smoothedBase_[i];
+      if (i == 0) {
+        timeHysteresis_.Process(smoothedBase_[i]);
+        p[i]->base = timeHysteresis_.value();
+      }
       p[i]->attenuverter = smoothedRandom_[i];
       p[i]->has_cv = controls.connected[i];
       p[i]->cv = controls.connected[i] ? smoothedCv_[i] : 0.f;
@@ -178,7 +210,7 @@ private:
     float result[3];
     for (int i = 0; i < 3; ++i) {
       float amount = controls.assignment == 3 ? bounded(controls.assignDepth[i], 0.f, 1.f) : controls.assignment == i ? 1.f : 0.f;
-      result[i] = bounded(bases[i] * 1.005f + assignCv_ * amount, 0.f, 1.f);
+      result[i] = bounded(bases[i] * 1.005f + (assignCv_ - .002f) * amount, 0.f, 1.f);
     }
     core.mix.feedback = result[0]; core.mix.dry_wet = result[1]; core.mix.reverb_amount = result[2];
     core.mix.output_gate = controls.gateOutput;
@@ -192,7 +224,11 @@ private:
     return std::isfinite(voltage) && (state ? voltage > .1f : voltage >= 1.f);
   }
   struct Gates { bool seed = false; bool freeze = false; };
-  Resampler inputSrc_, outputSrc_;
+  std::array<Resampler, 3> inputSrc_, outputSrc_;
+  int converter_ = 2;
+  bool kernelsReady_ = false;
+  double kernelHostRate_ = 0.;
+  stmlib::HysteresisFilter timeHysteresis_;
   std::array<Gates, Resampler::capacity> gates_{};
   std::array<int64_t, Resampler::capacity> gateTags_{};
   std::array<beads::FloatFrame, Core::maxBlock> inputBlock_{}, outputBlock_{};
@@ -206,6 +242,7 @@ private:
   float smoothedRandom_[4] = {}, smoothedCv_[4] = {};
   float smoothedDensity_ = .3f, assignCv_ = 0.f;
   bool frozen_ = false, freezeLatched_ = false, seedLocked_ = true;
+  bool blockFrozen_ = false;
   bool previousSeedButton_ = false, previousFreezeButton_ = false, previousLatchButton_ = false;
   bool previousSeedVoltage_ = false, previousFreezeVoltage_ = false;
 };

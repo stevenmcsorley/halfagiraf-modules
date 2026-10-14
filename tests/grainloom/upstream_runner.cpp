@@ -1,6 +1,7 @@
 // Calls the original tests; the original main() has every test commented out.
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #define main beads_disabled_upstream_main
 #include "../../vendor/mutable/beads/test/beads_test.cc"
@@ -10,6 +11,12 @@ static void fixture(const char* path) {
   FILE* file = fopen(path, "wb");
   if (!file) { std::perror(path); std::exit(1); }
   unsigned char header[48] = {};
+  const uint32_t dataBytes = 48000u * 40u * 4u;
+  auto put32 = [&](int offset, uint32_t v) { for (int i = 0; i < 4; ++i) header[offset + i] = uint8_t(v >> (i * 8)); };
+  auto put16 = [&](int offset, uint16_t v) { header[offset] = uint8_t(v); header[offset + 1] = uint8_t(v >> 8); };
+  std::memcpy(header, "RIFF", 4); put32(4, dataBytes + 40); std::memcpy(header + 8, "WAVEfmt ", 8);
+  put32(16, 20); put16(20, 1); put16(22, 2); put32(24, 48000); put32(28, 48000 * 4);
+  put16(32, 4); put16(34, 16); std::memcpy(header + 40, "data", 4); put32(44, dataBytes);
   fwrite(header, 1, sizeof(header), file);
   uint32_t state = 1;
   for (int i = 0; i < 48000 * 40; ++i) {
@@ -37,5 +44,9 @@ int main() {
   TestAudioRateTriggerGenerator();
   TestProcessor();
   TestSynth();
-  std::cout << "Original Beads grain-fade assertions and trigger, processor, synth renders completed\n";
+  TestProcessorTapDelay();
+  TestProcessorTapDelayTempoChange();
+  TestProcessorDelayGranularXFade();
+  TestFreezeGlitch();
+  std::cout << "Original Beads grain-fade assertions and trigger, processor, synth, clocked delay, mode transition and freeze renders completed\n";
 }

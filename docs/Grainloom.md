@@ -101,16 +101,16 @@ eight. Grainloom preserves all twelve, including the four FM banks in the source
 
 ## Frozen audio in patches
 
-Frozen recordings are copied to a preallocated snapshot over about 48 ms, after
-25 ms of stable freeze. Patch saving encodes that immutable snapshot outside the
+Frozen recordings are copied to a preallocated snapshot when the first fully
+frozen DSP block completes. Patch saving encodes that immutable snapshot outside the
 audio callback. The versioned little-endian source format includes quality,
 mono/stereo, write position and CRC32. An enabled snapshot adds roughly 1 MiB to
 the JSON. Unfrozen recordings add no audio data. The context menu disables snapshots.
 
 Reloading validates size, format, pointer range and checksum, then restores the
 buffer in bounded chunks while muting output. Running grains and reverb tails
-restart; the frozen recording and its read origin are restored. Wait at least
-100 ms after freezing before saving to ensure a completed snapshot is available.
+restart; the frozen recording and its read origin are restored. Restoration takes
+about 48 ms. Frozen wavetable mode is saved separately without an audio snapshot.
 
 ## Example patches
 
@@ -135,8 +135,10 @@ The 250 ms media transition mute follows codec restart behaviour.
 
 Native DSP renders have been compared byte-for-byte against the pinned upstream
 source. Host-rate matrix, buffer snapshot and actual Rack module tests are present.
-Hardware measurements, extended musical audition, exhaustive trigger statistics,
-long-session and concurrent state tests still need final acceptance review.
+Pitch, trigger regimes, a ten-minute modulated stress run, concurrent instances
+and snapshot readers have passed automated tests. Hardware measurements and
+extended musical audition remain outstanding; these checks do not certify
+every hardware interaction or analog conversion characteristic.
 This feature branch is under validation; it is not a published VCV Library release.
 
 Source and attribution: [Beads](https://github.com/pichenettes/eurorack/tree/d8f473915232af74347762b6365202bfd26f73f6/beads),

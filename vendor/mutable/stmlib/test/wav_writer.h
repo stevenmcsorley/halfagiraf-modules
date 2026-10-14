@@ -100,6 +100,7 @@ class WavWriter {
       short_buffer[i] = static_cast<int16_t>(x);
     }
     fwrite(short_buffer, sizeof(int16_t), size, fp_);
+    free(short_buffer);
     remaining_frames_ -= size / num_channels_;
   }
   
@@ -120,6 +121,7 @@ class WavWriter {
       }
     }
     fwrite(short_buffer, sizeof(int16_t), size * 2, fp_);
+    free(short_buffer);
     remaining_frames_ -= size;
   }
   

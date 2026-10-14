@@ -4,6 +4,19 @@
 #include <atomic>
 #include <memory>
 
+struct GrainloomPitchQuantity : ParamQuantity {
+  float getDisplayValue() override { return grainloom::Adapter::pitchLaw(getValue()); }
+  void setDisplayValue(float semitones) override {
+    float low = -1.f, high = 1.f;
+    for (int i = 0; i < 24; ++i) {
+      float midpoint = (low + high) * .5f;
+      if (grainloom::Adapter::pitchLaw(midpoint) < semitones) low = midpoint;
+      else high = midpoint;
+    }
+    setValue((low + high) * .5f);
+  }
+};
+
 struct Grainloom : Module {
   enum ParamId { TIME, PITCH, SIZE, SHAPE, TIME_RANDOM, PITCH_RANDOM, SIZE_RANDOM, SHAPE_RANDOM,
     DENSITY, FEEDBACK, REVERB, MIX, FREEZE, SEED, LATCH, QUALITY, ASSIGN, DEPTH, GAIN, CALIBRATE,
@@ -17,6 +30,7 @@ struct Grainloom : Module {
   std::atomic<bool> uiFrozen{false}, uiLocked{true}, uiSynth{false}, uiGain{false};
   std::atomic<float> uiPosition{0.f}, uiMeter{0.f};
   std::atomic<int> uiQuality{3};
+  std::atomic<uint32_t> persistedState{26};
   std::atomic<int> restoredFlags{-1};
   bool previousCalibrate = false;
   uint64_t previousBlocks = 0;
@@ -26,7 +40,7 @@ struct Grainloom : Module {
   Grainloom() {
     config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
     configParam(TIME, 0.f, 1.f, 0.f, "Time / wavetable scan", "%", 0.f, 100.f);
-    configParam(PITCH, -1.f, 1.f, 0.f, "Pitch (original interval detents)");
+    configParam<GrainloomPitchQuantity>(PITCH, -1.f, 1.f, 0.f, "Pitch (original interval detents)", " semitones");
     configParam(SIZE, 0.f, 1.f, .65f, "Grain size / reverse / infinite delay");
     configParam(SHAPE, 0.f, 1.f, .5f, "Grain envelope shape");
     const char* names[4] = {"Time", "Pitch", "Size", "Shape"};
@@ -64,8 +78,11 @@ struct Grainloom : Module {
   void onSampleRateChange(const SampleRateChangeEvent& e) override { adapter->setHostRate(e.sampleRate); }
   void onReset(const ResetEvent& e) override {
     Module::onReset(e);
-    adapter->setFreeze(false); adapter->setSeedLocked(true);
-    adapter->core.configure(3, false, false, true); adapter->resetBridge();
+    snapshots->cancel(); adapter->reset();
+    restoredFlags.store(-1); restoreInProgress = false; restoringSamples = 0;
+    previousBlocks = 0; previousCalibrate = false;
+    uiFrozen.store(false); uiLocked.store(true); uiSynth.store(false); uiQuality.store(3);
+    persistedState.store(26);
   }
   void process(const ProcessArgs& args) override {
     auto& c = adapter->controls;
@@ -92,18 +109,25 @@ struct Grainloom : Module {
     if (calibrate && !previousCalibrate) { params[GAIN].setValue(0.f); c.gain = 0; c.recalibrate = true; }
     previousCalibrate = calibrate;
     int restore = restoredFlags.exchange(-1);
-    if (restore >= 0) { adapter->setFreeze(restore & 1); adapter->setSeedLocked(restore & 2); }
-    if (++restoringSamples >= int(args.sampleRate / 4000.f)) {
+    if (restore >= 0) {
+      if (restore & 4) {
+        adapter->core.configure((restore >> 3) & 3, true, true, true);
+        adapter->resetBridge();
+      }
+      adapter->setFreeze(restore & 1); adapter->setSeedLocked(restore & 2);
+    }
+    bool pendingRestore = snapshots->pendingRestore();
+    if (pendingRestore && ++restoringSamples >= int(args.sampleRate / 4000.f)) {
       restoringSamples = 0;
       if (snapshots->restoreTick(adapter->core)) {
         adapter->setFreeze(true);
-        restoreInProgress = snapshots->restoring();
+        restoreInProgress = snapshots->pendingRestore();
         if (!restoreInProgress) adapter->resetBridge();
         outputs[OUT_L].setVoltage(0.f); outputs[OUT_R].setVoltage(0.f);
         return;
       }
     }
-    if (restoreInProgress) {
+    if (pendingRestore || restoreInProgress) {
       outputs[OUT_L].setVoltage(0.f); outputs[OUT_R].setVoltage(0.f);
       return;
     }
@@ -117,19 +141,28 @@ struct Grainloom : Module {
     lights[LATCH_LIGHT].setBrightness(adapter->seedLocked() ? 1.f : 0.f);
     if (adapter->renderedBlocks() != previousBlocks) {
       previousBlocks = adapter->renderedBlocks();
-      snapshots->tick(adapter->core, adapter->frozen());
-      uiFrozen.store(adapter->frozen()); uiLocked.store(adapter->seedLocked());
+      bool frozen = adapter->blockFrozen();
+      if (!frozen) uiFrozen.store(false);
+      if (params[SAVE_BUFFER].getValue() > .5f) snapshots->tick(adapter->core, frozen);
+      else snapshots->cancel();
+      if (frozen) uiFrozen.store(true);
+      uiLocked.store(adapter->seedLocked());
       uiSynth.store(adapter->core.synthMode()); uiQuality.store(adapter->core.media());
       uiPosition.store(adapter->core.writePointer() / float(adapter->core.maxFrames()));
       uiMeter.store(adapter->core.inputMeter()); uiGain.store(adapter->core.gainAdjusting());
+      persistedState.store((frozen ? 1u : 0u) | (adapter->seedLocked() ? 2u : 0u)
+        | (adapter->core.synthMode() ? 4u : 0u) | (uint32_t(adapter->core.media()) << 3), std::memory_order_release);
     }
   }
   json_t* dataToJson() override {
     json_t* root = json_object();
+    uint32_t state = persistedState.load(std::memory_order_acquire);
     json_object_set_new(root, "version", json_integer(1));
-    json_object_set_new(root, "freeze", json_boolean(uiFrozen.load()));
-    json_object_set_new(root, "seedLocked", json_boolean(uiLocked.load()));
-    if (uiFrozen.load() && !uiSynth.load() && params[SAVE_BUFFER].getValue() > .5f) {
+    json_object_set_new(root, "freeze", json_boolean(state & 1));
+    json_object_set_new(root, "seedLocked", json_boolean(state & 2));
+    json_object_set_new(root, "synthMode", json_boolean(state & 4));
+    json_object_set_new(root, "effectiveMedia", json_integer((state >> 3) & 3));
+    if ((state & 1) && !(state & 4) && params[SAVE_BUFFER].getValue() > .5f) {
       auto* slot = snapshots->claim();
       if (slot) {
         json_t* audio = json_object();
@@ -150,6 +183,10 @@ struct Grainloom : Module {
     if (json_integer_value(json_object_get(root, "version")) != 1) return;
     int flags = json_is_true(json_object_get(root, "freeze")) ? 1 : 0;
     if (json_is_true(json_object_get(root, "seedLocked"))) flags |= 2;
+    if (json_is_true(json_object_get(root, "synthMode"))) {
+      int effectiveMedia = int(json_integer_value(json_object_get(root, "effectiveMedia")));
+      flags |= 4 | (std::max(0, std::min(3, effectiveMedia)) << 3);
+    }
     json_t* audio = json_object_get(root, "audio");
     const char* format = json_string_value(json_object_get(audio, "format"));
     int media = int(json_integer_value(json_object_get(audio, "media")));
@@ -163,14 +200,25 @@ struct Grainloom : Module {
         bool valid = grainloom::decode(json_string_value(bytes), json_string_length(bytes), slot->bytes.data(), slot->bytes.size());
         valid = valid && grainloom::crc32(slot->bytes.data(), slot->bytes.size()) == uint32_t(json_integer_value(json_object_get(audio, "crc32")));
         if (valid) {
+          // The packed audio formats accept every bit pattern, but the original
+          // freeze-tail area contains IEEE floats and must reject poisoned data.
+          for (size_t offset = slot->bytes.size() - 2048; offset < slot->bytes.size(); offset += 4) {
+            float sample;
+            std::memcpy(&sample, slot->bytes.data() + offset, sizeof(sample));
+            if (!std::isfinite(sample)) { valid = false; break; }
+          }
+        }
+        if (valid) {
           slot->media = media; slot->mono = mono; slot->write = write;
-          params[QUALITY].setValue(float(media));
-          slot->state.store(grainloom::SnapshotBank::RESTORE, std::memory_order_release);
-          flags |= 1;
+          // Keep the stored knob selection: a quality change made while frozen
+          // remains pending until unfreeze, as in the firmware.
+          snapshots->queueRestore(slot);
+          flags = (flags & 7) | 1 | (slot->media << 3);
         } else slot->state.store(grainloom::SnapshotBank::FREE, std::memory_order_release);
       }
     }
     restoredFlags.store(flags);
+    persistedState.store(uint32_t(flags), std::memory_order_release);
   }
 };
 

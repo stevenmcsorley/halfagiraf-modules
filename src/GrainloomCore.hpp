@@ -30,7 +30,8 @@ public:
   uint8_t gainSetting = 0;
   uint32_t rng = 0x21;
 
-  Core() {
+  Core() { reset(); }
+  void reset() {
     // Firmware objects live in zero-initialized BSS and depend on that state.
     std::memset(&processor_, 0, sizeof(processor_));
     std::memset(&synth_, 0, sizeof(synth_));
@@ -39,10 +40,17 @@ public:
     processor_.Init(banks, reverb_.data());
     synth_.Init(reverb_.data());
     gain_.Init(48000.f, beads::GainControl::SOFT_CLIPPING_MODE_OFF, true);
+    parameters = beads::Parameters{};
+    density = beads::ModulatedParameter{};
+    mix = beads::Processor::MixParameters{};
     density.base = .3f;
     parameters.size.base = .65f;
     parameters.shape.base = .5f;
     mix.dry_wet = .5f;
+    rng = 0x21; synthMode_ = false; gainSetting = 0;
+    seedState = beads::SEED_BUTTON_STATE_LOCKED;
+    seedConnected = false; leftConnected = rightConnected = true;
+    previousSeed_ = stmlib::GATE_FLAG_LOW; seedDelay_.fill(false); seedIndex_ = 0;
   }
   int rate() const { return synthMode_ ? 48000 : int(processor_.sample_rate()); }
   int blockSize() const { return rate() / 4000; }
@@ -76,7 +84,7 @@ public:
   }
   // 2.5 ms firmware SEED delay; CV pots are sampled by the caller every block.
   void process(const beads::FloatFrame* input, const bool* seed, const bool* freeze,
-    beads::FloatFrame* output) {
+    beads::FloatFrame* output, bool active = true) {
     const int n = blockSize();
     beads::Codec::Frame raw[maxBlock];
     beads::FloatFrame gained[maxBlock];
@@ -91,7 +99,11 @@ public:
       flags[i] = previousSeed_ = stmlib::ExtractGateFlags(previousSeed_, delayed);
     }
     if (!seedConnected) previousSeed_ = stmlib::GATE_FLAG_LOW;
-    gain_.Process(true, gainSetting, !leftConnected, !rightConnected, raw, gained, n);
+    gain_.Process(active, gainSetting, !leftConnected, !rightConnected, raw, gained, n);
+    if (!active) {
+      for (int i = 0; i < n; ++i) output[i].l = output[i].r = 0.f;
+      return;
+    }
     stmlib::Random::Seed(rng);
     if (synthMode_) {
       synth_.Render(seedState, seedConnected ? flags : nullptr, freeze,

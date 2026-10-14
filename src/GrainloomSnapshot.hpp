@@ -47,7 +47,10 @@ inline bool decode(const char* text, size_t length, uint8_t* bytes, size_t size)
 // completed slot, restoration queues a third. No callback waits on a reader.
 class SnapshotBank {
 public:
-  enum { FREE, WRITING, READY, READING, RESTORE };
+  // Low bits are ownership; upper bits count immutable readers. Restore and
+  // serialization may read the same payload, but a writer requires zero readers.
+  enum { FREE = 0, WRITING = 1, READY = 2, RESTORE = 4, RESTORING = 8,
+    FLAG_MASK = 15, READER_ONE = 256 };
   struct Slot {
     std::atomic<int> state{FREE};
     std::array<uint8_t, Core::bufferBytes> bytes{};
@@ -56,88 +59,119 @@ public:
     uint32_t generation = 0;
   };
   std::array<Slot, 3> slots;
+
   void tick(Core& core, bool frozen) {
     if (!frozen || core.synthMode()) {
       for (auto& slot : slots) {
         int expected = READY;
         slot.state.compare_exchange_strong(expected, FREE);
       }
-      if (writing_ >= 0) { slots[writing_].state.store(FREE, std::memory_order_release); writing_ = -1; }
-      offset_ = 0; stableBlocks_ = 0; captured_ = false;
+      captured_ = false;
       return;
     }
-    if (captured_ || ++stableBlocks_ < 100) return;
-    if (writing_ < 0) {
-      for (int i = 0; i < 3; ++i) {
-        int expected = FREE;
-        if (slots[i].state.compare_exchange_strong(expected, WRITING)) { writing_ = i; break; }
+    if (captured_) return;
+    Slot* target = nullptr;
+    for (int pass = 0; pass < 2 && !target; ++pass) {
+      for (auto& slot : slots) {
+        int expected = pass == 0 ? FREE : READY;
+        if (slot.state.compare_exchange_strong(expected, WRITING)) { target = &slot; break; }
       }
-      if (writing_ < 0) {
-        for (int i = 0; i < 3; ++i) {
-          int expected = READY;
-          if (slots[i].state.compare_exchange_strong(expected, WRITING)) { writing_ = i; break; }
-        }
-      }
-      if (writing_ < 0) return;
-      slots[writing_].media = core.media(); slots[writing_].mono = core.mono();
-      slots[writing_].write = core.writePointer(); offset_ = 0;
     }
-    constexpr size_t chunk = 4096;
-    std::memcpy(slots[writing_].bytes.data() + offset_, core.buffer() + offset_, chunk);
-    offset_ += chunk;
-    if (offset_ == Core::bufferBytes) {
-      slots[writing_].generation = ++generation_;
-      slots[writing_].state.store(READY, std::memory_order_release);
-      writing_ = -1; captured_ = true;
-    }
+    if (!target) return;
+    target->media = core.media(); target->mono = core.mono(); target->write = core.writePointer();
+    // Fixed, preallocated copy at the first fully frozen DSP block. No CRC,
+    // encoding or serialization occurs here, and immediate saves retain audio.
+    std::memcpy(target->bytes.data(), core.buffer(), Core::bufferBytes);
+    target->generation = nextGeneration_.fetch_add(1) + 1;
+    target->state.store(READY, std::memory_order_release);
+    latest_.store(target->generation, std::memory_order_release);
+    captured_ = true;
   }
   Slot* claim() {
-    int newest = -1; uint32_t generation = 0;
-    for (int i = 0; i < 3; ++i) {
-      int expected = READY;
-      if (slots[i].state.compare_exchange_strong(expected, READING)) {
-        if (slots[i].generation >= generation) {
-          if (newest >= 0) slots[newest].state.store(READY, std::memory_order_release);
-          newest = i; generation = slots[i].generation;
-        } else slots[i].state.store(READY, std::memory_order_release);
-      }
-    }
-    return newest < 0 ? nullptr : &slots[newest];
-  }
-  void release(Slot* slot) { slot->state.store(READY, std::memory_order_release); }
-  Slot* reserveRestore() {
+    uint32_t wanted = latest_.load(std::memory_order_acquire);
     for (auto& slot : slots) {
-      int expected = FREE;
-      if (slot.state.compare_exchange_strong(expected, WRITING)) return &slot;
-    }
-    return nullptr;
-  }
-  bool restoreTick(Core& core) {
-    if (restoring_ < 0) {
-      for (int i = 0; i < 3; ++i) {
-        int expected = RESTORE;
-        if (slots[i].state.compare_exchange_strong(expected, READING)) {
-          restoring_ = i; restoreOffset_ = 0;
-          core.restore(slots[i].media, slots[i].mono, slots[i].write);
+      for (int attempt = 0; attempt < 8; ++attempt) {
+        int expected = slot.state.load(std::memory_order_acquire);
+        int flag = expected & FLAG_MASK;
+        if ((flag != READY && flag != RESTORE && flag != RESTORING) || (expected >> 8) >= 65535) break;
+        if (slot.state.compare_exchange_strong(expected, expected + READER_ONE)) {
+          if (slot.generation == wanted) return &slot;
+          release(&slot);
           break;
         }
       }
     }
-    if (restoring_ < 0) return false;
+    return nullptr;
+  }
+  void release(Slot* slot) { slot->state.fetch_sub(READER_ONE, std::memory_order_release); }
+
+  Slot* reserveRestore() {
+    for (int flag : {FREE, READY}) {
+      for (auto& slot : slots) {
+        int expected = flag;
+        if (slot.state.compare_exchange_strong(expected, WRITING)) return &slot;
+      }
+    }
+    return nullptr;
+  }
+  void queueRestore(Slot* slot) {
+    slot->generation = nextGeneration_.fetch_add(1) + 1;
+    slot->state.store(RESTORE, std::memory_order_release);
+    latest_.store(slot->generation, std::memory_order_release);
+  }
+  bool restoreTick(Core& core) {
+    if (restoring_ < 0) {
+      int newest = -1;
+      uint32_t generation = 0;
+      for (int i = 0; i < 3; ++i) {
+        if ((slots[i].state.load(std::memory_order_acquire) & FLAG_MASK) == RESTORE
+          && slots[i].generation >= generation) { newest = i; generation = slots[i].generation; }
+      }
+      if (newest < 0) return false;
+      // Multiple rapid patch loads must not replay an older queued recording
+      // after the newest one. Existing readers keep their immutable payload.
+      for (int i = 0; i < 3; ++i) {
+        if (i != newest && (slots[i].state.load(std::memory_order_acquire) & FLAG_MASK) == RESTORE
+          && slots[i].generation <= generation)
+          slots[i].state.fetch_xor(RESTORE ^ READY, std::memory_order_acq_rel);
+      }
+      // Only this callback changes the low bits after queue publication.
+      // Concurrent serializers change only the upper reader count.
+      slots[newest].state.fetch_xor(RESTORE ^ RESTORING, std::memory_order_acq_rel);
+      restoring_ = newest; restoreOffset_ = 0;
+      core.restore(slots[newest].media, slots[newest].mono, slots[newest].write);
+    }
     std::memcpy(core.buffer() + restoreOffset_, slots[restoring_].bytes.data() + restoreOffset_, 4096);
     restoreOffset_ += 4096;
     if (restoreOffset_ == Core::bufferBytes) {
-      slots[restoring_].generation = ++generation_;
-      slots[restoring_].state.store(READY, std::memory_order_release);
+      slots[restoring_].state.fetch_xor(RESTORING ^ READY, std::memory_order_release);
       restoring_ = -1; captured_ = true;
     }
     return true;
   }
   bool restoring() const { return restoring_ >= 0; }
+  bool pendingRestore() const {
+    for (const auto& slot : slots) {
+      int flag = slot.state.load(std::memory_order_acquire) & FLAG_MASK;
+      if (flag == RESTORE || flag == RESTORING) return true;
+    }
+    return false;
+  }
+  void cancel() {
+    restoring_ = -1; restoreOffset_ = 0; captured_ = false;
+    for (auto& slot : slots) {
+      int word = slot.state.load(std::memory_order_acquire);
+      int flag = word & FLAG_MASK;
+      if (flag == RESTORE || flag == RESTORING)
+        slot.state.fetch_xor(flag ^ READY, std::memory_order_acq_rel);
+      int expected = READY;
+      slot.state.compare_exchange_strong(expected, FREE);
+    }
+  }
 private:
-  int writing_ = -1, restoring_ = -1, stableBlocks_ = 0;
-  size_t offset_ = 0, restoreOffset_ = 0;
-  uint32_t generation_ = 0;
+  int restoring_ = -1;
+  size_t restoreOffset_ = 0;
+  std::atomic<uint32_t> nextGeneration_{0}, latest_{0};
   bool captured_ = false;
 };
 }

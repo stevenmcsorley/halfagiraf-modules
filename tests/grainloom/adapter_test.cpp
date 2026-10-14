@@ -81,6 +81,11 @@ static void nativeAdapterParity() {
 int main() {
   std::cout << "Packed 12-bit stereo bytes=" << sizeof(beads::Item<beads::RESOLUTION_12_BIT, 2>) << std::endl;
   assert(sizeof(beads::Item<beads::RESOLUTION_12_BIT, 2>) == 3);
+  beads::Item<beads::RESOLUTION_12_BIT, 2> packed{};
+  packed.l = 0x123; packed.r = -0x345;
+  const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&packed);
+  uint32_t expectedPacked = 0x123u | ((uint32_t(-0x345) & 0xfffu) << 12);
+  assert(bytes[0] == uint8_t(expectedPacked) && bytes[1] == uint8_t(expectedPacked >> 8) && bytes[2] == uint8_t(expectedPacked >> 16));
   beads::WavetableGrain boundary;
   boundary.Init(48000.f);
   boundary.Start(11, 16, 1.f, .005f, 8000.f, .5f, .5f, .5f, 0.f);

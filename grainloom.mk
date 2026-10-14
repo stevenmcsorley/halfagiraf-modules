@@ -25,11 +25,37 @@ grainloom-test:
 	$(GRAINLOOM_TEST_DIR)/snapshot_test
 	$(CXX) $(BEADS_HOST_FLAGS) tests/grainloom/trigger_test.cpp $(BEADS_HOST_SOURCES) -o $(GRAINLOOM_TEST_DIR)/trigger_test
 	$(GRAINLOOM_TEST_DIR)/trigger_test
+	$(CXX) $(BEADS_HOST_FLAGS) tests/grainloom/grain_test.cpp $(BEADS_HOST_SOURCES) -o $(GRAINLOOM_TEST_DIR)/grain_test
+	$(GRAINLOOM_TEST_DIR)/grain_test
 	$(CXX) $(BEADS_HOST_FLAGS) tests/grainloom/reference_render.cpp $(BEADS_SOURCES) -o $(GRAINLOOM_TEST_DIR)/host_reference
 	$(CXX) $(BEADS_FLAGS) tests/grainloom/reference_render.cpp $(BEADS_SOURCES) -o $(GRAINLOOM_TEST_DIR)/upstream_reference
 	$(GRAINLOOM_TEST_DIR)/host_reference $(GRAINLOOM_TEST_DIR)/host.f32
 	$(GRAINLOOM_TEST_DIR)/upstream_reference $(GRAINLOOM_TEST_DIR)/upstream.f32
 	cmp $(GRAINLOOM_TEST_DIR)/host.f32 $(GRAINLOOM_TEST_DIR)/upstream.f32
+
+.PHONY: grainloom-stress-test
+.PHONY: grainloom-pristine-test
+grainloom-pristine-test: grainloom-test
+	bash tests/grainloom/pristine_reference.sh $(CXX)
+
+.PHONY: grainloom-sanitize-test
+grainloom-sanitize-test:
+	mkdir -p $(GRAINLOOM_TEST_DIR)
+	@set -e; for name in adapter snapshot grain; do \
+		$(CXX) $(BEADS_HOST_FLAGS) -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/grainloom/$${name}_test.cpp $(BEADS_HOST_SOURCES) -o $(GRAINLOOM_TEST_DIR)/$${name}_sanitized; \
+		ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 $(GRAINLOOM_TEST_DIR)/$${name}_sanitized; \
+	done
+
+grainloom-stress-test:
+	mkdir -p $(GRAINLOOM_TEST_DIR)
+	$(CXX) $(BEADS_HOST_FLAGS) -pthread tests/grainloom/stress_test.cpp $(BEADS_HOST_SOURCES) -o $(GRAINLOOM_TEST_DIR)/stress_test
+	$(GRAINLOOM_TEST_DIR)/stress_test
+
+.PHONY: grainloom-audio-demo
+grainloom-audio-demo:
+	mkdir -p $(GRAINLOOM_TEST_DIR)
+	$(CXX) $(BEADS_HOST_FLAGS) tests/grainloom/audio_demo.cpp $(BEADS_HOST_SOURCES) -o $(GRAINLOOM_TEST_DIR)/audio_demo
+	$(GRAINLOOM_TEST_DIR)/audio_demo $(GRAINLOOM_TEST_DIR)/Grainloom-demo.wav
 
 .PHONY: grainloom-upstream-test
 grainloom-upstream-test:

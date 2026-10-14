@@ -22,7 +22,7 @@ int main() {
       assert(!grainloom::decode(text.data(), text.size(), queued->bytes.data(), queued->bytes.size()));
       std::memcpy(queued->bytes.data(), saved->bytes.data(), saved->bytes.size());
       queued->media = saved->media; queued->mono = saved->mono; queued->write = saved->write;
-      queued->state.store(grainloom::SnapshotBank::RESTORE);
+      bank->queueRestore(queued);
       int copied = 0;
       while (bank->restoreTick(*restored)) { ++copied; if (!bank->restoring()) break; }
       assert(copied == 192);
@@ -31,5 +31,19 @@ int main() {
       bank->release(saved);
     }
   }
+  bank->cancel();
+  auto* older = bank->reserveRestore(); assert(older);
+  older->bytes.fill(1); older->media = 3; older->mono = false; older->write = 11;
+  bank->queueRestore(older);
+  auto* newer = bank->reserveRestore(); assert(newer && newer != older);
+  newer->bytes.fill(2); newer->media = 3; newer->mono = false; newer->write = 17;
+  bank->queueRestore(newer);
+  auto* firstReader = bank->claim(); auto* secondReader = bank->claim();
+  assert(firstReader == newer && secondReader == newer);
+  for (int i = 0; i < 192; ++i) assert(bank->restoreTick(*restored));
+  assert(!bank->pendingRestore() && restored->writePointer() == 17);
+  assert(!bank->restoreTick(*restored));
+  for (int i = 0; i < grainloom::Core::bufferBytes; ++i) assert(restored->buffer()[i] == 2);
+  bank->release(firstReader); bank->release(secondReader);
   std::cout << "Frozen snapshots: all 8 media/channel combinations, exact restore, base64 validation and CRC pass\n";
 }

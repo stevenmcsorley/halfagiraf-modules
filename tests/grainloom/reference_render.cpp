@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
   bool frozen[12] = {}, seed[12] = {};
   (void)seed;
   beads::FloatFrame input[12], output[12];
+  uint32_t noise = 0x12345678;
   for (int media = 0; media < 4; ++media) {
     processor.Configure(beads::Processor::Media(media), false);
     stmlib::Random::Seed(0x21);
@@ -33,8 +34,29 @@ int main(int argc, char** argv) {
       if (block == 10000) p.size.base = 1.f;
       for (int i = 0; i < n; ++i) {
         float t = (block * n + i) / processor.sample_rate();
-        input[i].l = .31f * std::sin(2.f * 3.14159265358979323846f * 261.626f * t);
-        input[i].r = .23f * std::sin(2.f * 3.14159265358979323846f * 329.628f * t);
+        const float pi = 3.14159265358979323846f;
+        int fixture = int(t);
+        float phase = t - fixture;
+        noise = noise * 1664525u + 1013904223u;
+        float white = float(int32_t(noise)) / 2147483648.f;
+        if (fixture == 0) {
+          // Separated left/right impulses exercise stereo paths and decay.
+          input[i].l = phase < 1.f / processor.sample_rate() ? .7f : 0.f;
+          input[i].r = std::fabs(phase - .2f) < .5f / processor.sample_rate() ? .6f : 0.f;
+        } else if (fixture == 1) {
+          input[i].l = .3f * std::sin(2.f * pi * (40.f * phase + 8000.f * phase * phase));
+          input[i].r = .2f * std::sin(2.f * pi * (70.f * phase + 6000.f * phase * phase));
+        } else if (fixture == 2) {
+          input[i].l = .23f * white; input[i].r = -.17f * white;
+        } else if (fixture == 3) {
+          input[i].l = .2f * std::sin(2.f * pi * 261.626f * t) + .08f * std::sin(2.f * pi * 392.f * t);
+          input[i].r = .23f * std::sin(2.f * pi * 329.628f * t);
+        } else {
+          // Reproducible synthesized percussion loop, not an external sample.
+          float beat = std::fmod(phase, .25f);
+          input[i].l = .45f * std::exp(-beat * 30.f) * std::sin(2.f * pi * (55.f * beat + 12.f * (1.f - std::exp(-beat * 30.f))));
+          input[i].r = .25f * std::exp(-beat * 70.f) * white;
+        }
         frozen[i] = block > 6000 && block < 9000;
       }
       processor.Process(beads::SEED_BUTTON_STATE_LOCKED, nullptr, frozen, d, p, mix, input, output, n);

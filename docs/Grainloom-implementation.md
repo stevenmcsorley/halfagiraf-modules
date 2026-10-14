@@ -38,11 +38,6 @@ quantizer. Resources include 192 waves (12 x 16), with A-H plus four FM banks I-
 There is no UI restriction to eight in the released firmware. Grainloom follows this
 source mapping; all twelve are intended to be reachable.
 
-## Verification still required
-
-Host adapter, UI, persistence, audio comparisons, stress tests and platform builds
-are subsequent stages. Sonic parity and production readiness are not established.
-
 ## Host bridge and state implementation
 
 `GrainloomCore.hpp` owns the original 3 x 256 KiB bank allocation and 32 Kiword
@@ -52,6 +47,8 @@ Synth always runs 48 kHz. Clean tape retains its separate internal 2:1 converter
 
 `GrainloomResampler.hpp` uses fixed 128-tap Blackman-windowed sinc tables, 512
 fractional phases and a 2048-frame tagged history. Both channels share timestamps.
+All three internal-rate converter pairs are precomputed on host-rate setup;
+quality changes reset histories rather than regenerating kernels.
 Kernel generation and state reset use bounded loops and no heap operations.
 No rate converter is allocated on the callback. Host-rate changes reset only the
 bridge; original media changes reset the selected DSP configuration as in firmware.
@@ -65,11 +62,15 @@ and one DSP block. Continuous control values use the latest 4 kHz control snapsh
 Their phase relative to input conversion is a documented host difference.
 
 Snapshots use three preallocated ownership slots, acquired with atomic compare
-and exchange. After 25 ms stable freeze, 4096 bytes per block copy the recording;
-192 blocks finish in 48 ms. Serialization owns an immutable slot and performs
+and exchange. The first fully frozen DSP block makes one fixed 786432-byte copy
+before publishing its saved state. The largest observed copy in the local
+100-freeze test was 29.5 microseconds; this is not a universal worst-case bound.
+Serialization pins an immutable slot with an atomic reader count and performs
 base64/CRC/JSON on the caller thread. Restore validates exact lengths, format,
 media, mono flag, write range and CRC before queuing. The engine restores 4096
-bytes per block while muted. No compression is performed. Format v1 is the
+bytes per block while muted (192 blocks, approximately 48 ms). Queued and partially
+restored slots remain saveable before playback resumes. Frozen synth mode and its
+effective quality are persisted separately. No compression is performed. Format v1 is the
 little-endian packed Beads allocation (including its float freeze tail); every
 supported architecture is little-endian with IEEE-754 float. Running grains and
 reverb state are intentionally restarted, matching the scope of hardware backup.
@@ -83,6 +84,8 @@ reverb state are intentionally restarted, matching the scope of hardware backup.
   wrapper restores/saves each module's original LCG state around each DSP block.
   Generator constants and calls are preserved. A first static-member TLS version
   triggered GCC UBSan diagnostics; the accessor version passes the tested matrix.
+- `stmlib/test/wav_writer.h`: frees two temporary conversion buffers after writing.
+  This repairs leaks in the offline upstream harness only, not the sound engine.
 - `beads/gain_control.h`: host builds supply the codec's two int32 frame fields;
   the gain algorithm itself is unmodified.
 - `wavetable_grain.h` and `wavetable_voice.h`: skip the successor-wave read when
@@ -98,7 +101,7 @@ Other module DSP and compiler flags are unchanged.
 ## Evidence collected locally
 
 - `make test`: all ten existing deterministic suites pass.
-- `make grainloom-upstream-test`: original grain fade assertions and six render
+- `make grainloom-upstream-test`: original grain fade assertions and render
   routines complete using generated fixtures. Most upstream tests are renders,
   so completion is not a quality or parity assertion.
 - `make grainloom-test`: all 20 host-rate/media cases produce finite bounded
@@ -107,28 +110,47 @@ Other module DSP and compiler flags are unchanged.
 - Independent `reference_render.cpp` build against the pristine pinned upstream
   checkout equals the host render byte-for-byte across all four media, freeze,
   delay transition, reverb, randomisation and all twelve wavetable banks.
-  SHA-256: `1604f71423ee941f7f25f3d17738bd76546d16c5a082d4f2c0e2aad0bf33a533`.
+  Fixtures include separated stereo impulses, chirps, fixed-seed noise, chords
+  and a synthesized percussion loop. `make grainloom-pristine-test` reproducibly
+  fetches the exact original revisions into the ignored build directory and
+  repeats the independent comparison.
+  Windows SHA-256: `61474d38c8e3cec3b6699da1d641d29df039daa228b2302dce45e652c6db1dcc`.
+  Other compilers can produce different float bytes; comparisons are between
+  host and pristine builds made with the same compiler, not cross-compiler hashes.
 - SRC test: 1 kHz passband vs 17 kHz stopband while converting to 24 kHz,
   measured rejection 75.4-110.0 dB over the five required host rates.
 - Snapshot test: all eight quality/channel combinations restore exact bytes;
   malformed base64 and CRC checks are exercised.
-- Rack-linked Windows test: module creation, live DSP, freeze JSON saving/reload
-  and extreme feedback stay bounded and pass.
+- Rack-linked Windows test: creation, DSP, immediate freeze saving, queued/partial
+  restore re-saving, JSON reload, corrupted-checksum rejection, reset, frozen
+  synth restoration, right-output gates and extreme feedback pass.
 - Linux GCC AddressSanitizer/UndefinedBehaviorSanitizer matrix passed after the
   TLS correction. Further boundary/stress scenarios are being added.
 - Windows SDK 2.6.6 plugin DLL and .vcvplugin package build successfully.
 
-Adapter storage is 1,494,304 bytes; three snapshot slots add approximately
-2.36 MiB. Total persistent per-module DSP/state storage is approximately 3.68 MiB,
+Adapter storage is 2,676,048 bytes; three snapshot slots add 2,359,384 bytes.
+Total persistent per-module DSP/state storage is approximately 4.80 MiB,
 excluding Rack widgets. The Windows offline rate/media matrix ran in about
-1.55 seconds for 52 seconds of simulated audio, including construction and rate
+1.28 seconds for 52 seconds of simulated audio, including construction and rate
 setup, on this workstation. That is an aggregate offline measurement, not Rack's
-live per-module CPU meter or worst-case callback timing.
+live per-module CPU meter or worst-case callback timing. The ten-minute modulated
+48 kHz stress run completed in 11.44 seconds with allocation prohibited on its
+processing thread. Independent concurrent instances matched sequential renders;
+concurrent immutable snapshot checks passed. All five host rates tracked
+65.405-523.24 Hz within 0.008 cents in the wavetable pitch test. Original trigger
+tests produced identical counts at 24/32/48 kHz for periodic, stochastic, clock
+division, clock probability, gated and audio-rate modes. Original forward/reverse
+and double-speed interpolation/envelope checks and 32-voice stealing tests pass.
 
 ## Acceptance work still outstanding
 
-Cross-platform CI, extended timing/pitch and trigger-distribution tests, musical
-fixture comparisons beyond sine input, long-session/multi-thread stress,
-module reset/persistence edge cases, and final panel
-review remain. No physical Beads recording or measured analog codec reference
+The initial feature CI built packages for Windows x64, Linux x64, macOS Intel and
+Apple Silicon successfully (run 38529160264). Updated feature validation adds
+native adapter tests on every build architecture and the longer stress suite.
+Its final result must be checked before using the latest packages.
+
+Recorded drum-loop/spoken-word comparisons, extended human audition, and
+full hardware control/analog measurements remain. The included screenshot was
+rendered in actual Rack with an isolated user directory, not a panel mock-up.
+No physical Beads recording or measured analog codec reference
 has been used, so hardware-level sonic parity is not yet certified.
