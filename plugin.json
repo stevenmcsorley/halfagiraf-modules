@@ -49,6 +49,18 @@
       "description": "Granular texture synthesizer based on the open-source Mutable Instruments Beads DSP.",
       "manualUrl": "https://github.com/stevenmcsorley/halfagiraf-modules/blob/main/docs/Grainloom.md",
       "tags": ["Granular", "Effect", "Synth voice", "Delay", "Reverb"]
+    },
+    {
+      "slug": "Sonavyre",
+      "name": "SONAVYRE",
+      "description": "Visual Stereo Effects Engine. Development build.",
+      "tags": [
+        "Effect",
+        "Reverb",
+        "Delay",
+        "Chorus",
+        "Visual"
+      ]
     }
   ]
 }

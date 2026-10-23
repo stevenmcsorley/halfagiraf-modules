@@ -9,4 +9,5 @@ void init(Plugin* p) {
 	p->addModel(modelEntwine);
 	p->addModel(modelConstellate);
 	p->addModel(modelGrainloom);
+	p->addModel(modelSonavyre);
 }

@@ -11,3 +11,6 @@ extern Model* modelMOD1;
 extern Model* modelEntwine;
 extern Model* modelConstellate;
 extern Model* modelGrainloom;
+
+extern Model* modelSonavyre;
+extern Model* modelSonavyrePro;

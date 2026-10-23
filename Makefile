@@ -8,11 +8,13 @@ CXXFLAGS +=
 LDFLAGS +=
 
 SOURCES += $(filter-out src/Palimpsest.cpp,$(wildcard src/*.cpp))
+SOURCES += src/sonavyre/Sonavyre.cpp
 SOURCES += $(BEADS_HOST_SOURCES)
 
 $(patsubst %,build/%.o,$(BEADS_HOST_SOURCES)) build/src/Grainloom.cpp.o: CXXFLAGS += -DGRAINLOOM_HOST -Ivendor/mutable -include cstdio -Wno-unused-local-typedefs $(BEADS_LAYOUT_FLAGS) -fno-unsafe-math-optimizations -fno-finite-math-only -ffp-contract=off
 
 DISTRIBUTABLES += res
+DISTRIBUTABLES += docs/sonavyre
 DISTRIBUTABLES += $(wildcard LICENSE*)
 DISTRIBUTABLES += $(wildcard presets)
 
