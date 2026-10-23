@@ -1,22 +1,22 @@
 #include "../../src/sonavyre/engine/Engine.hpp"
 Plugin* pluginInstance=nullptr;
-// The comparison module is compiled from the untouched checkout, not shipped.
+// The comparison host is normalized from the hash-verified untouched checkout, not shipped.
 namespace original {
 Plugin* pluginInstance=nullptr;
-#include "../../../upstream-halfagiraf-vcv/src/FXAidPro.cpp"
+#include "../../build/sonavyre-reference/Host.cpp"
 }
 #include <cstdio>
 #include <memory>
 int main(){
  auto migrated=std::unique_ptr<SonavyreEngine>(new SonavyreEngine);
- auto reference=std::unique_ptr<original::FXAidPro>(new original::FXAidPro);
+ auto reference=std::unique_ptr<original::ReferenceHost>(new original::ReferenceHost);
  for(int p=0;p<8;p++)std::memcpy(reference->bank[p],migrated->bank[p],sizeof(migrated->bank[p]));
  reference->nSlots=8;
  if(migrated->nSlots!=246)return 5;
  for(int p=0;p<200;p++){
-  if(std::memcmp(migrated->bank[p+8],original::FXAIDPRO_DEFAULT_BANK[p],512))return 6;
-  if(migrated->slotNames[p+8]!=original::FXAIDPRO_DEFAULT_NAMES[p])return 7;
-  for(int c=0;c<3;c++)if(migrated->slotLabels[p+8][c]!=original::FXAIDPRO_DEFAULT_LABELS[p][c])return 8;
+  if(std::memcmp(migrated->bank[p+8],original::SONAVYRE_COMPLETE_BANK[p],512))return 6;
+  if(migrated->slotNames[p+8]!=original::SONAVYRE_COMPLETE_NAMES[p])return 7;
+  for(int c=0;c<3;c++)if(migrated->slotLabels[p+8][c]!=original::SONAVYRE_COMPLETE_LABELS[p][c])return 8;
  }
  int frames=0;
  for(float rate:{44100.f,48000.f,96000.f})for(int p=0;p<8;p++){
@@ -37,11 +37,11 @@ int main(){
   }
  }
  // Verify the complete added bank through the original host, not only the VM.
- for(int p=0;p<200;p++)std::memcpy(reference->bank[p],original::FXAIDPRO_DEFAULT_BANK[p],512);
+ for(int p=0;p<200;p++)std::memcpy(reference->bank[p],original::SONAVYRE_COMPLETE_BANK[p],512);
  reference->nSlots=200;
  for(float rate:{44100.f,48000.f,96000.f})for(int p=0;p<200;p++){
   migrated->setProgram(p+8);reference->setProgram(p);
-  migrated->params[SonavyreEngine::PROG_PARAM].setValue(p+8);reference->params[original::FXAidPro::PROG_PARAM].setValue(p);
+  migrated->params[SonavyreEngine::PROG_PARAM].setValue(p+8);reference->params[original::ReferenceHost::PROG_PARAM].setValue(p);
   for(int i=0;i<512;i++){
    for(auto* m:std::vector<Module*>{migrated.get(),reference.get()}){
     m->inputs[SonavyreEngine::L_INPUT].setVoltage(i==0?1.f:.2f*std::sin(i*.04f));m->inputs[SonavyreEngine::R_INPUT].setVoltage(.1f*std::cos(i*.07f));
@@ -54,7 +54,7 @@ int main(){
  for(float rate:{44100.f,48000.f,96000.f})for(int p=0;p<38;p++){
   std::memcpy(reference->bank[0],SONAVYRE_EXTRA_BANK[p],512);
   migrated->setProgram(p+208);reference->setProgram(0);
-  migrated->params[SonavyreEngine::PROG_PARAM].setValue(p+208);reference->params[original::FXAidPro::PROG_PARAM].setValue(0);
+  migrated->params[SonavyreEngine::PROG_PARAM].setValue(p+208);reference->params[original::ReferenceHost::PROG_PARAM].setValue(0);
   for(int i=0;i<512;i++){
    for(auto* m:std::vector<Module*>{migrated.get(),reference.get()}){
     m->inputs[SonavyreEngine::L_INPUT].setVoltage(i==0?1.f:.2f*std::sin(i*.04f));m->inputs[SonavyreEngine::R_INPUT].setVoltage(.1f*std::cos(i*.07f));

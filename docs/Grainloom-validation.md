@@ -3,7 +3,7 @@
 Status: implemented release candidate, not a published release and not certified
 as hardware-identical. Branch: `feature/grainloom-beads-port`.
 Verified code commit: `da488e7ab50082454be4619e9d6ba5b039da5fdf`.
-The original dirty `halfagiraf-modules` worktree, including Myriad work, and the
+The original dirty `halfagiraf-modules` worktree, including the earlier effects-module work work, and the
 normal Rack user installation were not replaced.
 
 ## Files and integration

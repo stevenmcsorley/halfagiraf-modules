@@ -61,3 +61,7 @@ Both editions omit WAV bank import and the hidden audio firmware-listen gesture.
 ## Edition separation, 23 October 2026
 
 Linux builds succeed for Free (12), Studio (64) and unchanged full PRO (246). All three plugin/module pairs load together in actual Rack Free 2.6.6 using a dedicated QA profile. `screenshots/editions-rack.png` records the real UI. The full VM regression still passes 2248704 stereo frames bit-identically, and the host regression still passes 562176 stereo frames exactly against the original host. Disk preset regression passes. New focused checks pass for every selected Free/Studio binary, finite audio, program navigation, required reverbs, cross-edition catalogue mapping, curated-bank boundaries, disabled compositions and reset. Windows/macOS SONAVYRE builds remain unverified; previous Grainloom platform validation does not establish these new builds.
+
+## Neutral source naming
+
+All optional manufacturer and legacy product names have been removed from the current tracked text, including source symbols, comments and historical documentation. Original licence/copyright notices remain. Program words and parameter metadata are unchanged. `prepare_sonavyre_reference.py` verifies the original checkout inputs against REFERENCE-SOURCES.json, then generates a build-only processing reference with neutral identifiers and include paths; the original checkout is never edited. The full VM/host, disk-library and 12/64 edition checks pass after this rename. Historical Git commits are not rewritten.

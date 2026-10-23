@@ -40,7 +40,7 @@ so their waveform is correctly flat.
 Windows x64 package build and Linux x64 compilation passed with Rack SDK 2.6.6.
 Rack 2.6.6's native screenshot renderer produced the checked 100% and 200%
 previews in isolated Linux user storage; the user's running Windows Rack,
-normal installation and Myriad were not modified.
+normal installation and the earlier effects-module work were not modified.
 
 The targeted Rack module harness passed audio, freeze/JSON reload and bounded
 feedback checks, with added assertions for both waveform channels and digital

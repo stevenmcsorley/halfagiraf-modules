@@ -17,7 +17,7 @@ small primary-control steps reach DSP state in approximately 19-31 ms; this is
 not a measurement of perceptual equivalence. The exact tested code remains
 `b1d2a23`; subsequent release preparation changes documentation only.
 
-The release contains the four published modules plus Grainloom. Myriad stays
+The release contains the four published modules plus Grainloom. the earlier effects-module work stays
 in its separate uncommitted worktree and is not changed or included.
 
 ### Original acceptance verdict
@@ -138,11 +138,11 @@ published without the sample owner's redistribution permission.
 No human approval is recorded yet. No hardware measurement is recorded.
 
 Current main is published 2.0.2 (`3541f29`). The original separate worktree has
-uncommitted Myriad source, tests and assets. None were modified, discarded or
+uncommitted the earlier effects-module work source, tests and assets. None were modified, discarded or
 silently folded into this candidate. This package retains Bad Sector, MOD1,
-Entwine and Constellate plus Grainloom; it does not contain Myriad.
-Before installing it over any bundle containing Myriad, reconcile the approved
-Myriad snapshot into the release branch and repeat combined-package validation.
+Entwine and Constellate plus Grainloom; it does not contain the earlier effects-module work.
+Before installing it over any bundle containing the earlier effects-module work, reconcile the approved
+the earlier effects-module work snapshot into the release branch and repeat combined-package validation.
 The user's choice about including that uncommitted implementation is pending.
 
 Normal Rack settings were separately backed up for the local installation test.

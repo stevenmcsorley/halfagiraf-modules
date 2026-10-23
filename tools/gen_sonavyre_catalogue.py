@@ -7,9 +7,11 @@ container is deliberately not included. Project owner authorized use on 2026-10-
 from pathlib import Path
 import base64,json,re,sys
 family=Path(__file__).resolve().parent.parent
-source=family.parent/'upstream-halfagiraf-vcv/tools/fxaid-editor/data.json'
+candidates=list((family.parent/'upstream-halfagiraf-vcv/tools').glob('*/data.json'))
+assert len(candidates)==1, 'Specify an unambiguous offline editor data source'
+source=candidates[0]
 header=(family/'src/sonavyre/presets/CompleteBank.hpp').read_text()
-part=header.split('static const uint32_t FXAIDPRO_DEFAULT_BANK[200][128] = {')[1].split('};')[0]
+part=header.split('static const uint32_t SONAVYRE_COMPLETE_BANK[200][128] = {')[1].split('};')[0]
 pro={b''.join(int(w,16).to_bytes(4,'big')for w in re.findall(r'0x[0-9a-fA-F]+',row))for row in re.findall(r'\{([^{}]+)\}',part)}
 programs=[]
 for p in json.loads(source.read_text())['programs']:

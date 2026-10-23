@@ -1,0 +1,10 @@
+{
+  "revision": "1f00b67259779aef2f6a32e060159e992b82bf95",
+  "files": {
+    "Host.cpp": "31e99790860c1edf93b132ac3920c842db63fa6b5691e36b78787992acce7ca7",
+    "FV1.hpp": "f1f4a060c4477aad2a88737e36ebebed0106dc3cc3ade75a45117ae862c5ca27",
+    "Bank.hpp": "83a112b126a604f6ae090352c6f2f660b23cb7320ac480523ebcde5229270f5b",
+    "Decoder.hpp": "cce870bef67a623e406f6957d1c2fa69ae431747fdf71754b22c7fa2d922dad5",
+    "plugin.hpp": "b3b9bca702e49447d9528728ffef12f950ec02cc152f40f62d7fe5fa92e3f541"
+  }
+}

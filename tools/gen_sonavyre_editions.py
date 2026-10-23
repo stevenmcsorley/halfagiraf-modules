@@ -12,7 +12,7 @@ def read(file,prefix):
  names=re.findall(r'"([^"\n]*)"',part('NAMES'))
  labels=re.findall(r'\{([^{}]+)\}',part('LABELS'))
  return list(zip(rows,names,labels))
-allrows=read('OriginalBank.hpp','FXAID_DEFAULT_')[:8]+read('CompleteBank.hpp','FXAIDPRO_DEFAULT_')
+allrows=read('OriginalBank.hpp','SONAVYRE_ORIGINAL_')[:8]+read('CompleteBank.hpp','SONAVYRE_COMPLETE_')
 free=list(range(8))+[132,160,149,135]
 studio=free+[33,34,35,36,37,38,39,41,44,46,47,49,52,53,55,59,60,62,70,71,75,83,84,85,86,91,92,93,95,99,102,105,107,108,110,111,119,123,125,127,130,133,138,141,150,151,162,163,166,174,181,204]
 assert len(free)==12 and len(studio)==64 and len(set(studio))==64

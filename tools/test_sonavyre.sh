@@ -7,6 +7,7 @@ if [[ "${1:-}" == "--self-contained" ]]; then
   # CI has the distributable source, not access to the owner's private baseline.
   tests=(library)
 else
+  python3 tools/prepare_sonavyre_reference.py
   python3 tools/gen_sonavyre_catalogue.py --check
 fi
 python3 tools/gen_sonavyre_editions.py --check

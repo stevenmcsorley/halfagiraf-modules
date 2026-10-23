@@ -176,15 +176,15 @@ struct SonavyreEngine : Module {
         }
 #else
 		for (int p = 0; p < 8; p++) {
-			std::memcpy(bank[p], FXAID_DEFAULT_BANK[p], sizeof(bank[p]));
-			slotNames[p] = FXAID_DEFAULT_NAMES[p];
+			std::memcpy(bank[p], SONAVYRE_ORIGINAL_BANK[p], sizeof(bank[p]));
+			slotNames[p] = SONAVYRE_ORIGINAL_NAMES[p];
 			for (int c = 0; c < 3; c++)
-				slotLabels[p][c] = FXAID_DEFAULT_LABELS[p][c];
+				slotLabels[p][c] = SONAVYRE_ORIGINAL_LABELS[p][c];
 		}
-		for (int p = 0; p < FXAIDPRO_BANK_SIZE; p++) {
-			std::memcpy(bank[p + 8], FXAIDPRO_DEFAULT_BANK[p], sizeof(bank[p + 8]));
-			slotNames[p + 8] = FXAIDPRO_DEFAULT_NAMES[p];
-			for (int c = 0; c < 3; c++) slotLabels[p + 8][c] = FXAIDPRO_DEFAULT_LABELS[p][c];
+		for (int p = 0; p < SONAVYRE_COMPLETE_SIZE; p++) {
+			std::memcpy(bank[p + 8], SONAVYRE_COMPLETE_BANK[p], sizeof(bank[p + 8]));
+			slotNames[p + 8] = SONAVYRE_COMPLETE_NAMES[p];
+			for (int c = 0; c < 3; c++) slotLabels[p + 8][c] = SONAVYRE_COMPLETE_LABELS[p][c];
 		}
 		for (int p=0;p<38;p++) {
 			std::memcpy(bank[p+208],SONAVYRE_EXTRA_BANK[p],sizeof(bank[p+208]));

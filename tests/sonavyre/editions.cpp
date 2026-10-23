@@ -10,7 +10,7 @@ int main(){
  bool black=false,plate=false;
  for(int p=0;p<PRO_N;p++) {
   int global=sonavyreFactoryId(p);
-  const uint32_t* expected=global<8?FXAID_DEFAULT_BANK[global]:FXAIDPRO_DEFAULT_BANK[global-8];
+  const uint32_t* expected=global<8?SONAVYRE_ORIGINAL_BANK[global]:SONAVYRE_COMPLETE_BANK[global-8];
   if(std::memcmp(m->bank[p],expected,512))return 2;
   black|=m->slotNames[p]=="Reverb Black Hole";plate|=m->slotNames[p]=="Reverb Plate Classic";
   m->params[SonavyreEngine::PROG_PARAM].setValue(p);
