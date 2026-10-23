@@ -2,6 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 : "${RACK_DIR:?Set RACK_DIR to an absolute Rack SDK directory}"
+python3 tools/gen_sonavyre_catalogue.py --check
 mkdir -p build/sonavyre-tests
 common=(-std=c++11 -O2 "-I$RACK_DIR/include" "-I$RACK_DIR/dep/include" "-L$RACK_DIR" -lRack "-Wl,-rpath,$RACK_DIR")
 for test in parity host library; do

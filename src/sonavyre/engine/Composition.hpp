@@ -65,7 +65,7 @@ struct SonavyreComposition {
   auto number=[](json_t* x,float fallback,float lo,float hi){double v=json_is_number(x)?json_number_value(x):fallback;return float(std::isfinite(v)?std::max(double(lo),std::min(double(hi),v)):fallback);};
   mix.store(number(json_object_get(j,"mix"),1,0,1));gain.store(number(json_object_get(j,"gain"),1,0,2));
   auto a=json_object_get(j,"stages");for(int i=0;i<2;i++){auto x=json_array_get(a,i);if(!json_is_object(x))continue;auto& s=stages[i];
-   s.enabled.store(json_is_true(json_object_get(x,"enabled")));s.program.store(int(number(json_object_get(x,"program"),0,0,199)));s.wet.store(number(json_object_get(x,"wet"),1,0,1));
+   s.enabled.store(json_is_true(json_object_get(x,"enabled")));s.program.store(int(number(json_object_get(x,"program"),0,0,245)));s.wet.store(number(json_object_get(x,"wet"),1,0,1));
    auto ps=json_object_get(x,"pots");for(int c=0;c<3;c++)s.pots[c].store(number(json_array_get(ps,c),.5,0,1));
   }
  }

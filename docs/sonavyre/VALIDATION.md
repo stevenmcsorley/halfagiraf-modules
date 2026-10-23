@@ -13,7 +13,7 @@ These results validate a development checkpoint, not the full mission or release
 - Disk library: create, reload in a new instance, rename, favourite, duplicate and delete. Test uses an isolated temporary user directory. GUI file-dialog import/export and failure workflows are not yet acceptance-tested.
 - Existing family `make test` suite passed, including Bad Sector, Constellate and other existing fixtures. Existing modules' implementation files are unchanged.
 - Actual running Rack patch: Entwine provides stereo audio to both new modules; Pro restores its chorus/delay combination enabled. Scopes and stereo indicators respond to measured signals. See `validation.vcv` and `screenshots/Rack-running-linux.png`. The fallback engine is running; this is not a sound-card loopback or listening test.
-- No extracted Pro firmware bank or offline firmware editor data is staged into the new products.
+- Initial checkpoint excluded the extracted bank. The owner has now confirmed rights and requested inclusion; the complete 200-program header is bundled, unchanged, as `CompleteBank.hpp`. The editor’s firmware-image template remains excluded; its 38 additional actual program binaries are now included as `CatalogueExtras.hpp`.
 
 ## Reproduce focused checks
 
@@ -33,3 +33,21 @@ No whole-product performance/latency acceptance, audio-device listening validati
 See `AUDIT.md` for explicit engineering and licensing release blockers.
 
 The additional `Rack-module-browser-linux.png` capture shows both new products coexisting with the original family in Rack's native browser. An attempted scripted GUI preset-name entry did not complete; disk persistence is verified by the focused library test, while interactive name-entry acceptance remains outstanding.
+
+
+## UI and full-bank revision — 2026-10-23
+
+- Added the original 200 programs without changing their binary instructions, names or parameter labels. Appended them to the original eight programs, preserving existing development-patch program indices. Both editions expose the same 246-program factory bank.
+- Added a **Big reverbs** filter (existing Black Hole, Cloud, Infinite, Hall, Space and Shimmer programs).
+- Moved Pro previous/next controls completely outside the display and away from stage controls; moved/relabelled LFO restart. Moved the free module’s CV row out of the screen/central-knob gap and labelled all three controls separately.
+- Restored the established right-edge family giraffe and centred footer wordmark. Knob labels now follow actual effect parameter metadata rather than generic numbers.
+- Replaced the thin scope with a bounded UI-only ribbon/particle field driven by chronological atomic output samples and measured RMS envelope. It does not claim to measure internal grains or a calibrated spectrum. Animation toggle retains a stationary field.
+- Added `audition.vcv` selecting Black Hole and Infinite Dark reverbs, with Entwine input and combination stages bypassed for direct audition. The prior validation patch is retained.
+- Updated parity coverage: **2,248,704 stereo VM frames across all 246 programs**, and **562,176 host stereo frames** against the original host at 44.1/48/96 kHz. Host comparison includes all 238 added programs, bank/metadata identity, original-eight compatibility, preset persistence and reset preservation. Disk-library checks remain unchanged.
+
+The revised builds were loaded together in Rack 2.6.6 on the desktop with Black Hole and Infinite Dark selected. `screenshots/Rack-208-effects-ui.png` records the actual running UI. All 246 bank entries and their original parameter metadata are present; the eight original development slots remain unchanged.
+
+
+The final revision also includes the editor catalogue’s 38 binaries absent from the 200-program bank. `gen_sonavyre_catalogue.py --check` verifies their bytes and labels against the untouched editor data. Total coverage is now 2,248,704 VM stereo frames and 562,176 host stereo frames across 246 factory programs. The 38 added programs are appended, so the previous 208 program indices remain stable. The final running screenshot is `screenshots/Rack-246-effects-ui.png`.
+
+Label-spacing follow-up: lowered the small-knob row by 1.5 mm, moved the lower socket row and labels down to preserve separation, lifted the two side parameter names above their decorative rings, and placed the central parameter name above its knob. No DSP or bank data changed. Both Linux plugin builds passed; existing full-bank parity results still apply.

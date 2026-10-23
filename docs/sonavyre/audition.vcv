@@ -1,0 +1,164 @@
+{
+  "version": "2.6.6",
+  "modules": [
+    {
+      "id": 1,
+      "plugin": "halfagiraf",
+      "model": "Sonavyre",
+      "version": "2.1.0",
+      "pos": [
+        0,
+        0
+      ],
+      "data": {
+        "prog": 132,
+        "customBank": false,
+        "chain": {
+          "bypass": true,
+          "stages": [
+            {
+              "enabled": false
+            },
+            {
+              "enabled": false
+            }
+          ]
+        }
+      },
+      "params": [
+        {
+          "id": 0,
+          "value": 0.75
+        },
+        {
+          "id": 1,
+          "value": 0.45
+        },
+        {
+          "id": 2,
+          "value": 0.6
+        },
+        {
+          "id": 3,
+          "value": 0.65
+        },
+        {
+          "id": 4,
+          "value": 0.5
+        },
+        {
+          "id": 5,
+          "value": 1
+        },
+        {
+          "id": 6,
+          "value": 132
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "plugin": "halfagiraf-sonavyre-pro",
+      "model": "SonavyrePro",
+      "version": "2.1.0",
+      "pos": [
+        18,
+        0
+      ],
+      "data": {
+        "chain": {
+          "bypass": true,
+          "stages": [
+            {
+              "enabled": false
+            },
+            {
+              "enabled": false
+            }
+          ]
+        },
+        "prog": 151,
+        "customBank": false
+      },
+      "params": [
+        {
+          "id": 0,
+          "value": 0.75
+        },
+        {
+          "id": 1,
+          "value": 0.45
+        },
+        {
+          "id": 2,
+          "value": 0.6
+        },
+        {
+          "id": 3,
+          "value": 0.65
+        },
+        {
+          "id": 4,
+          "value": 0.5
+        },
+        {
+          "id": 5,
+          "value": 1
+        },
+        {
+          "id": 6,
+          "value": 151
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "plugin": "halfagiraf",
+      "model": "Entwine",
+      "version": "2.1.0",
+      "pos": [
+        0,
+        1
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 10,
+      "outputModuleId": 3,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 5,
+      "color": "#68b9ca"
+    },
+    {
+      "id": 11,
+      "outputModuleId": 3,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 6,
+      "color": "#68b9ca"
+    },
+    {
+      "id": 12,
+      "outputModuleId": 3,
+      "outputId": 0,
+      "inputModuleId": 2,
+      "inputId": 5,
+      "color": "#68b9ca"
+    },
+    {
+      "id": 13,
+      "outputModuleId": 3,
+      "outputId": 1,
+      "inputModuleId": 2,
+      "inputId": 6,
+      "color": "#68b9ca"
+    }
+  ],
+  "zoom": 1.6,
+  "gridOffset": [
+    -2,
+    -0.078947365
+  ]
+}

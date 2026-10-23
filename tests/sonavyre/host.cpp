@@ -12,6 +12,12 @@ int main(){
  auto reference=std::unique_ptr<original::FXAidPro>(new original::FXAidPro);
  for(int p=0;p<8;p++)std::memcpy(reference->bank[p],migrated->bank[p],sizeof(migrated->bank[p]));
  reference->nSlots=8;
+ if(migrated->nSlots!=246)return 5;
+ for(int p=0;p<200;p++){
+  if(std::memcmp(migrated->bank[p+8],original::FXAIDPRO_DEFAULT_BANK[p],512))return 6;
+  if(migrated->slotNames[p+8]!=original::FXAIDPRO_DEFAULT_NAMES[p])return 7;
+  for(int c=0;c<3;c++)if(migrated->slotLabels[p+8][c]!=original::FXAIDPRO_DEFAULT_LABELS[p][c])return 8;
+ }
  int frames=0;
  for(float rate:{44100.f,48000.f,96000.f})for(int p=0;p<8;p++){
   migrated->setProgram(p);reference->setProgram(p);
@@ -30,10 +36,38 @@ int main(){
    frames++;
   }
  }
+ // Verify the complete added bank through the original host, not only the VM.
+ for(int p=0;p<200;p++)std::memcpy(reference->bank[p],original::FXAIDPRO_DEFAULT_BANK[p],512);
+ reference->nSlots=200;
+ for(float rate:{44100.f,48000.f,96000.f})for(int p=0;p<200;p++){
+  migrated->setProgram(p+8);reference->setProgram(p);
+  migrated->params[SonavyreEngine::PROG_PARAM].setValue(p+8);reference->params[original::FXAidPro::PROG_PARAM].setValue(p);
+  for(int i=0;i<512;i++){
+   for(auto* m:std::vector<Module*>{migrated.get(),reference.get()}){
+    m->inputs[SonavyreEngine::L_INPUT].setVoltage(i==0?1.f:.2f*std::sin(i*.04f));m->inputs[SonavyreEngine::R_INPUT].setVoltage(.1f*std::cos(i*.07f));
+    m->process(Module::ProcessArgs{rate,1.f/rate,frames});
+   }
+   for(int c=0;c<2;c++)if(migrated->outputs[c].getVoltage()!=reference->outputs[c].getVoltage()){std::fprintf(stderr,"Complete-bank host mismatch %d %d\n",p,i);return 9;}
+   frames++;
+  }
+ }
+ for(float rate:{44100.f,48000.f,96000.f})for(int p=0;p<38;p++){
+  std::memcpy(reference->bank[0],SONAVYRE_EXTRA_BANK[p],512);
+  migrated->setProgram(p+208);reference->setProgram(0);
+  migrated->params[SonavyreEngine::PROG_PARAM].setValue(p+208);reference->params[original::FXAidPro::PROG_PARAM].setValue(0);
+  for(int i=0;i<512;i++){
+   for(auto* m:std::vector<Module*>{migrated.get(),reference.get()}){
+    m->inputs[SonavyreEngine::L_INPUT].setVoltage(i==0?1.f:.2f*std::sin(i*.04f));m->inputs[SonavyreEngine::R_INPUT].setVoltage(.1f*std::cos(i*.07f));
+    m->process(Module::ProcessArgs{rate,1.f/rate,frames});
+   }
+   for(int c=0;c<2;c++)if(migrated->outputs[c].getVoltage()!=reference->outputs[c].getVoltage())return 10;
+   frames++;
+  }
+ }
  migrated->params[0].setValue(.23f);migrated->savePreset(0);migrated->params[0].setValue(.9f);migrated->recallPreset(0);
  if(migrated->params[0].getValue()!=.23f)return 2;
  auto j=migrated->dataToJson();auto restored=std::unique_ptr<SonavyreEngine>(new SonavyreEngine);restored->dataFromJson(j);json_decref(j);
  if(!restored->presets[0].used||restored->presets[0].pots[0]!=.23f)return 3;
- restored->onReset();if(!restored->presets[0].used||restored->nSlots!=8)return 4;
+ restored->onReset();if(!restored->presets[0].used||restored->nSlots!=246)return 4;
  std::printf("PASS: %d host stereo frames exactly match original advanced processing at 44.1/48/96 kHz with CV and reduced clock; user preset recall, patch data and non-destructive reset.\n",frames);
 }

@@ -3,6 +3,8 @@
 #include <atomic>
 #include "../core/FV1.hpp"
 #include "../presets/OriginalBank.hpp"
+#include "../presets/CompleteBank.hpp"
+#include "../presets/CatalogueExtras.hpp"
 #include "../core/Firmware.hpp"
 #include <osdialog.h>
 #include "Composition.hpp"
@@ -18,7 +20,7 @@
 // labels inside each 640-byte record, so no fingerprint catalog is needed.
 // ─────────────────────────────────────────────────────────────────────────────
 
-static const int PRO_N = 200;   // 200
+static const int PRO_N = 246; // Eight original slots, complete 200-program bank, 38 catalogue additions.
 static const float PRO_CLOCK = 32768.f;        // nominal FV-1 clock (Hz)
 
 // One record inside the Pro firmware image: 128-byte header + 512-byte program.
@@ -82,9 +84,12 @@ struct SonavyreEngine : Module {
 	enum OutputId { L_OUTPUT, R_OUTPUT, OUTPUTS_LEN };
 	enum LightId { CLIP_LIGHT, LFO_LIGHT, LIGHTS_LEN };
 
-	std::atomic<float> meterL{0.f}, meterR{0.f};
+	std::atomic<float> meterL{0.f}, meterR{0.f}, outputPower{0.f};
+	float analysisPowerSum=0.f;
+	unsigned analysisCount=0;
 	std::atomic<float> scope[128];
 	unsigned scopeWrite = 0, scopeDivider = 0;
+	std::atomic<unsigned> scopeCursor{0};
 	bool animate = true;
 	SonavyreComposition chain;
 	FV1 vm;
@@ -167,8 +172,18 @@ struct SonavyreEngine : Module {
 			for (int c = 0; c < 3; c++)
 				slotLabels[p][c] = FXAID_DEFAULT_LABELS[p][c];
 		}
+		for (int p = 0; p < FXAIDPRO_BANK_SIZE; p++) {
+			std::memcpy(bank[p + 8], FXAIDPRO_DEFAULT_BANK[p], sizeof(bank[p + 8]));
+			slotNames[p + 8] = FXAIDPRO_DEFAULT_NAMES[p];
+			for (int c = 0; c < 3; c++) slotLabels[p + 8][c] = FXAIDPRO_DEFAULT_LABELS[p][c];
+		}
+		for (int p=0;p<38;p++) {
+			std::memcpy(bank[p+208],SONAVYRE_EXTRA_BANK[p],sizeof(bank[p+208]));
+			slotNames[p+208]=SONAVYRE_EXTRA_NAMES[p];
+			for(int c=0;c<3;c++)slotLabels[p+208][c]=SONAVYRE_EXTRA_LABELS[p][c];
+		}
 		chain.invalidate();
-		nSlots = 8;
+		nSlots = PRO_N;
 		customBank = false;
 	}
 
@@ -209,7 +224,7 @@ struct SonavyreEngine : Module {
 		if (base == img.size()) { err = "No Pro program table found"; return false; }
 
 		int count = 0;
-		for (int r = 0; r < PRO_N; r++) {
+		for (int r = 0; r < FXAIDPRO_BANK_SIZE; r++) {
 			size_t rec = base + (size_t)r * PRO_REC;
 			if (rec + PRO_REC > img.size()) break;
 			if (!validProgAt(rec + PRO_HDR)) break;
@@ -602,9 +617,11 @@ struct SonavyreEngine : Module {
 		chain.process(outL, outR, dt, bank, nSlots, clockHz);
 		outputs[L_OUTPUT].setVoltage(outL);
 		outputs[R_OUTPUT].setVoltage(outR);
+		analysisPowerSum += (outL*outL + outR*outR) * .005f;
+		if (++analysisCount == 256) { outputPower.store(analysisPowerSum/256.f, std::memory_order_relaxed); analysisPowerSum=0.f; analysisCount=0; }
 		meterL.store(outL, std::memory_order_relaxed);
 		meterR.store(outR, std::memory_order_relaxed);
-		if (++scopeDivider == 32) { scopeDivider = 0; scope[scopeWrite++ % 128].store((outL + outR) * 0.05f, std::memory_order_relaxed); }
+		if (++scopeDivider == 32) { scopeDivider = 0; scope[scopeWrite++ % 128].store((outL + outR) * 0.05f, std::memory_order_relaxed); scopeCursor.store(scopeWrite, std::memory_order_release); }
 
 		// ── lights ──
 		float peak = std::max(std::fabs(outL), std::fabs(outR)) / 10.f;
