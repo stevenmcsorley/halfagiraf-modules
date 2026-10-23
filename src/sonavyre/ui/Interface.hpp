@@ -1,4 +1,5 @@
 #pragma once
+#include <osdialog.h>
 #include "../engine/Engine.hpp"
 #include "../presets/Library.hpp"
 #include "../visualisations/EnergyField.hpp"
@@ -143,7 +144,7 @@ struct SonavyreWidget : ModuleWidget {
    for(int c=0;c<2;c++)addOutput(createOutputCentered<SonavyreOutputPort>(mm2px(Vec(w*x[c+4],116.5f)),m,SonavyreEngine::L_OUTPUT+c));
   }
   auto labels=new SonavyreParameterLabels;labels->module=m;labels->pro=pro;labels->box.size=box.size;addChild(labels);
-  // All original buttons remain accessible, including firmware-listen gesture.
+  // Program navigation and LFO restart.
   addParam(createParamCentered<SonavyreButton>(mm2px(Vec(pro?6.5f:8.f,60.f+(pro?8.f:0.f))),m,SonavyreEngine::PREV_PARAM));
   addParam(createParamCentered<SonavyreButton>(mm2px(Vec(w-(pro?6.5f:8.f),60.f+(pro?8.f:0.f))),m,SonavyreEngine::NEXT_PARAM));
   addParam(createParamCentered<SonavyreButton>(mm2px(Vec(pro?w-8.f:w*.5f,pro?96.f:91.f)),m,SonavyreEngine::LFO_PARAM));
@@ -271,6 +272,5 @@ struct SonavyreWidget : ModuleWidget {
    [=](){float v=m->visualSensitivity;return v<2.f?0:(v<4.f?1:(v<8.f?2:3));},
    [=](int index){const float levels[]={1.f,2.5f,5.f,10.f};m->visualSensitivity=levels[clamp(index,0,3)];}));
   menu->addChild(createCheckMenuItem("Audio visualisation","",[=](){return m->animate;},[=](){m->animate=!m->animate;}));
-  menu->addChild(createMenuItem("Import program-bank WAV...", "",[=](){char* p=osdialog_file(OSDIALOG_OPEN,nullptr,nullptr,nullptr);if(p){m->loadFirmwareFile(p);std::free(p);}}));
  }
 };

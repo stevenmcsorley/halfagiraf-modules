@@ -5,27 +5,15 @@
 #include "../presets/OriginalBank.hpp"
 #include "../presets/CompleteBank.hpp"
 #include "../presets/CatalogueExtras.hpp"
-#include "../core/Firmware.hpp"
-#include <osdialog.h>
 #include "Composition.hpp"
 #include <string>
 #include <vector>
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FX Aid Pro — recreation of the Happy Nerding FX Aid Pro (14HP multi-effect).
-// The same real FV-1 virtual machine as the standard FX Aid, but with the Pro's
-// 200-program bank, OLED-style display, input gain, sample-rate reduction (a
-// variable FV-1 clock), three internal LFOs and 10 user presets. Firmware WAVs
-// exported from fxaid.app's Pro editor carry the program NAMES and control
-// labels inside each 640-byte record, so no fingerprint catalog is needed.
-// ─────────────────────────────────────────────────────────────────────────────
+// Shared SONAVYRE host adapted from the original advanced implementation.
+// See docs/sonavyre/AUDIT.md for provenance.
 
 static const int PRO_N = 246; // Eight original slots, complete 200-program bank, 38 catalogue additions.
 static const float PRO_CLOCK = 32768.f;        // nominal FV-1 clock (Hz)
-
-// One record inside the Pro firmware image: 128-byte header + 512-byte program.
-static const int PRO_REC = 640;
-static const int PRO_HDR = 128;
 
 struct ProLFO {
 	// shapes: 0 Off, 1 Triangle, 2 Ramp, 3 Saw, 4 S&H, 5 Smooth random, 6 Sine, 7 Square
@@ -119,22 +107,12 @@ struct SonavyreEngine : Module {
 	float vmOutL = 0.f, vmOutR = 0.f, vmOutPL = 0.f, vmOutPR = 0.f;
 	float clipEnv = 0.f;
 
-	// firmware update listen mode
-	bool updateMode = false;
-	std::vector<float> updateBuf;
-	double updatePhase = 0.0;
-	int updateSilence = 0;
-	bool updateHeard = false;
-	int updateFlash = 0;
-	std::string firmwareStatus;
-
 	// display state
 	float dispPots[3] = {0.5f, 0.5f, 0.5f};
 	float dispSrr = 1.f;
 
 	dsp::SchmittTrigger prevTrig, nextTrig, lfoTrig, srrGate;
 	dsp::BooleanTrigger progKnobTrig;
-	float bothHeld = 0.f;
 	int lastProgKnob = -1;
 
 	SonavyreEngine() {
@@ -199,139 +177,6 @@ struct SonavyreEngine : Module {
 		}
 	}
 
-	// Parse the 200 named 640-byte records out of a decoded Pro firmware image.
-	bool parseProImage(const std::vector<uint8_t>& img, std::string& err) {
-		// Locate the record table: each record's program (record+128) must be
-		// 128 legal FV-1 words, and the header name must be printable ASCII.
-		auto validProgAt = [&](size_t off) {
-			if (off + 512 > img.size()) return false;
-			for (size_t i = 0; i < 512; i += 4)
-				if ((img[off + i + 3] & 0x1F) > 0x14) return false;
-			return true;
-		};
-		auto looksLikeRecord = [&](size_t base) {
-			if (base + PRO_REC > img.size()) return false;
-			// header byte 0 is a zero lead-in; name starts at +1 with ≥1 ASCII char
-			uint8_t c = img[base + 1];
-			if (c < 0x20 || c > 0x7e) return false;
-			return validProgAt(base + PRO_HDR);
-		};
-		size_t base = img.size();
-		if (looksLikeRecord(0xb018)) base = 0xb018;   // known Pro layout
-		if (base == img.size()) {
-			for (size_t i = 0; i + PRO_REC <= img.size(); i += 4)
-				if (looksLikeRecord(i) && looksLikeRecord(i + PRO_REC)) { base = i; break; }
-		}
-		if (base == img.size()) { err = "No Pro program table found"; return false; }
-
-		int count = 0;
-		for (int r = 0; r < FXAIDPRO_BANK_SIZE; r++) {
-			size_t rec = base + (size_t)r * PRO_REC;
-			if (rec + PRO_REC > img.size()) break;
-			if (!validProgAt(rec + PRO_HDR)) break;
-			const uint8_t* h = &img[rec];
-			auto cstr = [&](int off, int max) {
-				std::string s;
-				for (int i = 0; i < max && h[off + i]; i++) {
-					uint8_t ch = h[off + i];
-					if (ch >= 0x20 && ch <= 0x7e) s += (char)ch;
-				}
-				return s;
-			};
-			slotNames[r] = cstr(1, 30);
-			if (slotNames[r].empty()) slotNames[r] = string::f("Slot %d", r + 1);
-			slotLabels[r][0] = cstr(0x21, 14);
-			slotLabels[r][1] = cstr(0x31, 14);
-			slotLabels[r][2] = cstr(0x41, 14);
-			for (int c = 0; c < 3; c++)
-				if (slotLabels[r][c].empty()) slotLabels[r][c] = "-";
-			const uint8_t* pw = h + PRO_HDR;
-			for (int i = 0; i < 128; i++)
-				bank[r][i] = ((uint32_t)pw[i * 4] << 24) | ((uint32_t)pw[i * 4 + 1] << 16)
-				           | ((uint32_t)pw[i * 4 + 2] << 8) | pw[i * 4 + 3];
-			count++;
-		}
-		if (count < 1) { err = "No programs decoded"; return false; }
-		chain.invalidate();
-		nSlots = count;
-		return true;
-	}
-
-	bool parseStandardImage(const std::vector<uint8_t>& img, std::string& err){
-	// Locate the 32 x 512-byte FV-1 bank inside the firmware image.
-	// The 4 bytes at image offset 0x6800 are a content-dependent checksum, so
-	// the bank cannot be found by a fixed marker. Instead: a bank is 4096
-	// big-endian words that all decode to legal FV-1 opcodes (0x00..0x14).
-	auto validBankAt = [&](size_t off) {
-		if (off + 16384 > img.size()) return false;
-		for (size_t i = 0; i < 16384; i += 4)
-			if ((img[off + i + 3] & 0x1F) > 0x14)
-				return false;
-		return true;
-	};
-	size_t bankOff = img.size();
-	// 1) the known layout of the current firmware image
-	if (validBankAt(0x6818))
-		bankOff = 0x6818;
-	// 2) the CV-config anchor (00 ff 00 ff 00 x4) directly precedes the bank
-	if (bankOff == img.size()) {
-		static const uint8_t ANCHOR[20] = {
-			0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00,
-			0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00
-		};
-		for (size_t i = 0; i + 20 + 16384 <= img.size(); i++) {
-			if (!std::memcmp(&img[i], ANCHOR, 20) && validBankAt(i + 20)) {
-				bankOff = i + 20;
-				break;
-			}
-		}
-	}
-	// 3) brute scan for any valid bank position
-	if (bankOff == img.size()) {
-		for (size_t i = 0; i + 16384 <= img.size(); i += 4) {
-			if (validBankAt(i)) {
-				bankOff = i;
-				break;
-			}
-		}
-	}
-	if (bankOff == img.size()) {
-		err = "Program bank not found in firmware image";
-		return false;
-	}
-	const uint8_t* b = &img[bankOff];
-	for (int p = 0; p < 32; p++)
-		for (int i = 0; i < 128; i++) {
-			const uint8_t* w = b + p * 512 + i * 4;
-			bank[p][i] = ((uint32_t)w[0] << 24) | ((uint32_t)w[1] << 16) | ((uint32_t)w[2] << 8) | w[3];
-		}
-	chain.invalidate();
-	nSlots=32;
-	for(int p=0;p<32;p++){slotNames[p]=string::f("Imported program %d",p+1);for(int c=0;c<3;c++)slotLabels[p][c]=string::f("Parameter %d",c+1);}
-	err.clear();return true;
-	}
-
-	void applyFirmware(const std::vector<float>& audio48k) {
-		std::vector<uint8_t> img;
-		std::string err;
-		if (fxaidDecodeImage(audio48k, img, err) && (parseProImage(img, err) || parseStandardImage(img, err))) {
-			customBank = true;
-			setProgram(clamp(prog, 0, nSlots - 1));
-			firmwareStatus = string::f("Loaded %d programs", nSlots) + (err.empty() ? "" : " (" + err + ")");
-			updateFlash = 96000;
-		}
-		else {
-			firmwareStatus = "Update failed: " + err;
-			updateFlash = -96000;
-		}
-	}
-
-	void loadFirmwareFile(const std::string& path) {
-		std::vector<float> audio;
-		if (!fxaidReadWav48k(path, audio)) { firmwareStatus = "Could not read WAV"; return; }
-		applyFirmware(audio);
-	}
-
 	void savePreset(int i) {
 		Preset& pr = presets[i];
 		pr.used = true;
@@ -359,7 +204,6 @@ struct SonavyreEngine : Module {
 		loadDefaultBank();
 		setProgram(0);
 		srrRoute = 0;
-		updateMode = false;
 		for (int l = 0; l < 3; l++) lfo[l] = ProLFO();
 		// User presets deliberately survive module reset.
 	}
@@ -517,44 +361,19 @@ struct SonavyreEngine : Module {
 
 		bool pPrev = params[PREV_PARAM].getValue() > 0.5f;
 		bool pNext = params[NEXT_PARAM].getValue() > 0.5f;
-		if (pPrev && pNext) {
-			bothHeld += dt;
-			if (bothHeld > 1.f && !updateMode) {
-				updateMode = true;
-				updateBuf.clear();
-				updateBuf.reserve(48000u * 90u);
-				updatePhase = 0.0; updateSilence = 0; updateHeard = false;
-				firmwareStatus = "Listening for firmware...";
-			}
+		bool prevEdge = prevTrig.process(pPrev ? 1.f : 0.f);
+		bool nextEdge = nextTrig.process(pNext ? 1.f : 0.f);
+		if (prevEdge && !pNext) {
+			setProgram((prog + nSlots - 1) % nSlots); params[PROG_PARAM].setValue(prog); lastProgKnob = prog;
 		}
-		else {
-			bothHeld = 0.f;
-			if (prevTrig.process(pPrev ? 1.f : 0.f) && !pNext) {
-				if (updateMode) { updateMode = false; firmwareStatus = ""; }
-				else { setProgram((prog + nSlots - 1) % nSlots); params[PROG_PARAM].setValue(prog); lastProgKnob = prog; }
-			}
-			if (nextTrig.process(pNext ? 1.f : 0.f) && !pPrev) {
-				if (updateMode) { updateMode = false; firmwareStatus = ""; }
-				else { setProgram((prog + 1) % nSlots); params[PROG_PARAM].setValue(prog); lastProgKnob = prog; }
-			}
+		if (nextEdge && !pPrev) {
+			setProgram((prog + 1) % nSlots); params[PROG_PARAM].setValue(prog); lastProgKnob = prog;
 		}
 
 		// ── input gain (0.5 = unity, 1.0 = +6 dB) ──
 		float gain = params[INGAIN_PARAM].getValue() * 2.f;
 		float inL = inputs[L_INPUT].getVoltage() / 5.f * gain;
 		float inR = inputs[R_INPUT].isConnected() ? inputs[R_INPUT].getVoltage() / 5.f * gain : inL;
-
-		// ── firmware listen mode ──
-		if (updateMode) {
-			float mono = (inputs[R_INPUT].isConnected() && !inputs[L_INPUT].isConnected()) ? inR : inL;
-			updatePhase += 48000.0 * dt;
-			while (updatePhase >= 1.0) { updatePhase -= 1.0; updateBuf.push_back(mono); }
-			if (std::fabs(mono) > 0.05f) { updateHeard = true; updateSilence = 0; }
-			else if (updateHeard) updateSilence++;
-			bool full = updateBuf.size() >= 48000u * 90u;
-			bool done = updateHeard && updateSilence > (int)(0.5f * args.sampleRate);
-			if (full || done) { updateMode = false; applyFirmware(updateBuf); updateBuf.clear(); updateBuf.shrink_to_fit(); }
-		}
 
 		// ── SRR routable input ──
 		float srrCV = inputs[SRR_CV_INPUT].getVoltage();
@@ -632,8 +451,6 @@ struct SonavyreEngine : Module {
 		if ((int)(args.frame % 64) == 0) {
 			lights[CLIP_LIGHT].setBrightness(clipEnv > 0.98f ? 1.f : 0.f);
 			lights[LFO_LIGHT].setBrightness(lfoLight);
-			if (updateFlash > 0) { updateFlash -= 64; lights[LFO_LIGHT].setBrightness((updateFlash / 6000) % 2 ? 1.f : 0.f); }
-			else if (updateFlash < 0) { updateFlash += 64; lights[CLIP_LIGHT].setBrightness((-updateFlash / 6000) % 2 ? 1.f : 0.f); }
 		}
 	}
 };

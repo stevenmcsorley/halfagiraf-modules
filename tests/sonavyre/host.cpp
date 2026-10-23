@@ -69,5 +69,20 @@ int main(){
  auto j=migrated->dataToJson();auto restored=std::unique_ptr<SonavyreEngine>(new SonavyreEngine);restored->dataFromJson(j);json_decref(j);
  if(!restored->presets[0].used||restored->presets[0].pots[0]!=.23f)return 3;
  restored->onReset();if(!restored->presets[0].used||restored->nSlots!=246)return 4;
+ // Holding both navigation buttons must leave audio processing and the bank intact.
+ int selected=restored->prog;
+ restored->params[SonavyreEngine::PROG_PARAM].setValue(selected);
+ restored->params[SonavyreEngine::PREV_PARAM].setValue(1.f);
+ restored->params[SonavyreEngine::NEXT_PARAM].setValue(1.f);
+ for(int i=0;i<60000;i++) {
+  restored->process(Module::ProcessArgs{48000.f,1.f/48000.f,i});
+  if(restored->prog!=selected||restored->nSlots!=246||!std::isfinite(restored->outputs[0].getVoltage()))return 11;
+ }
+ restored->params[SonavyreEngine::PREV_PARAM].setValue(0.f);
+ restored->params[SonavyreEngine::NEXT_PARAM].setValue(0.f);
+ restored->process(Module::ProcessArgs{48000.f,1.f/48000.f,60000});
+ restored->params[SonavyreEngine::NEXT_PARAM].setValue(1.f);
+ restored->process(Module::ProcessArgs{48000.f,1.f/48000.f,60001});
+ if(restored->prog!=(selected+1)%246)return 12;
  std::printf("PASS: %d host stereo frames exactly match original advanced processing at 44.1/48/96 kHz with CV and reduced clock; user preset recall, patch data and non-destructive reset.\n",frames);
 }

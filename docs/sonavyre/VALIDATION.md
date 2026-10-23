@@ -7,7 +7,7 @@ These results validate a development checkpoint, not the full mission or release
 - Family plugin and independent Pro plugin built with `/home/dev/Rack-SDK`; both loaded concurrently in the actual Rack 2.6.6 application with a private user directory and Xvfb display. Logs record model and widget creation for both unique slugs. No existing installed plugin directories were overwritten.
 - Copied `FV1.hpp` is byte-identical to the untouched upstream file.
 - VM comparison: eight original effects × three parameter settings × 32768 stereo frames = **786432 stereo frames bit-identical** to the original interpreter.
-- Host comparison: eight original effects × three host rates × 8192 stereo frames = **196608 stereo frames exactly equal** to the untouched advanced module's processing path, with stereo stimulus, parameter CV and reduced engine clock. This does not yet cover every LFO/routing shape or external firmware variant.
+- Host comparison: eight original effects × three host rates × 8192 stereo frames = **196608 stereo frames exactly equal** to the untouched advanced module's processing path, with stereo stimulus, parameter CV and reduced engine clock. This does not yet cover every LFO/routing shape variant.
 - Composition: disabled-path identity, finite/nonzero serial and parallel impulse processing, and settings JSON round-trip.
 - Preset host: save/recall, patch data round-trip and preservation of ten patch preset slots through module reset.
 - Disk library: create, reload in a new instance, rename, favourite, duplicate and delete. Test uses an isolated temporary user directory. GUI file-dialog import/export and failure workflows are not yet acceptance-tested.
@@ -28,7 +28,7 @@ The comparison executable includes the untouched original host and its original 
 
 ## Limits
 
-No whole-product performance/latency acceptance, audio-device listening validation, real external-firmware import fixture, restart UI acceptance, sanitizer stress pass, Windows/macOS build, release archive, or store submission is claimed. The running screenshot's CPU/GUI measurements include Entwine, both effects modules, extra FV-1 stages, software-display overhead and the current machine load; they are not isolated module benchmarks. The new vector panels remain development artwork requiring polish and reference review.
+No whole-product performance/latency acceptance, audio-device listening validation, restart UI acceptance, sanitizer stress pass, Windows/macOS build, release archive, or store submission is claimed. The running screenshot's CPU/GUI measurements include Entwine, both effects modules, extra FV-1 stages, software-display overhead and the current machine load; they are not isolated module benchmarks. The new vector panels remain development artwork requiring polish and reference review.
 
 See `AUDIT.md` for explicit engineering and licensing release blockers.
 
@@ -53,3 +53,7 @@ The final revision also includes the editor catalogue’s 38 binaries absent fro
 Label-spacing follow-up: lowered the small-knob row by 1.5 mm, moved the lower socket row and labels down to preserve separation, lifted the two side parameter names above their decorative rings, and placed the central parameter name above its knob. No DSP or bank data changed. Both Linux plugin builds passed; existing full-bank parity results still apply.
 
 Visual-response tuning: increased quiet-signal sensitivity, waveform detail and attack speed; added a soft-knee energy mapping to retain movement on louder material. A persisted Visual sensitivity menu offers 1×, 2.5× (default), 5× and 10× analysis gain, with no audio-gain change. Both Linux builds compile; the audio processing path is unchanged.
+
+## WAV import removal
+
+Both editions omit WAV bank import and the hidden audio firmware-listen gesture. The unused copied decoder is removed; the original repository remains unchanged. Host regression additionally holds both navigation buttons for 60000 frames, verifies unchanged program/bank and finite audio, then checks normal next-program navigation. Existing custom-bank patch restoration and preset JSON import/export remain supported.
