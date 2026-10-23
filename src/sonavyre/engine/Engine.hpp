@@ -91,6 +91,7 @@ struct SonavyreEngine : Module {
 	unsigned scopeWrite = 0, scopeDivider = 0;
 	std::atomic<unsigned> scopeCursor{0};
 	bool animate = true;
+	float visualSensitivity = 2.5f; // UI only; never applied to audio gain.
 	SonavyreComposition chain;
 	FV1 vm;
 	uint32_t bank[PRO_N][128];
@@ -367,6 +368,7 @@ struct SonavyreEngine : Module {
 		json_t* r = json_object();
 		json_object_set_new(r, "chain", chain.toJson());
 		json_object_set_new(r, "animate", json_boolean(animate));
+		json_object_set_new(r, "visualSensitivity", json_real(visualSensitivity));
 		json_object_set_new(r, "prog", json_integer(prog));
 		json_object_set_new(r, "srrRoute", json_integer(srrRoute));
 		json_object_set_new(r, "customBank", json_boolean(customBank));
@@ -435,6 +437,7 @@ struct SonavyreEngine : Module {
 		json_t* j;
 		chain.fromJson(json_object_get(r, "chain"));
 		if ((j = json_object_get(r, "animate"))) animate = json_is_true(j);
+		if ((j = json_object_get(r, "visualSensitivity")) && json_is_number(j)) { float v=json_number_value(j); visualSensitivity=std::isfinite(v)?clamp(v,1.f,10.f):2.5f; }
 		if ((j = json_object_get(r, "srrRoute"))) srrRoute = clamp(int(json_integer_value(j)),0,5);
 		if ((j = json_object_get(r, "lfos"))) {
 			for (int l = 0; l < 3 && l < (int)json_array_size(j); l++) {

@@ -267,6 +267,9 @@ struct SonavyreWidget : ModuleWidget {
    }));
   }));
   menu->addChild(createMenuItem("Reset parameters", "",[=](){for(int c=0;c<3;c++)m->params[SonavyreEngine::KNOB1_PARAM+c].setValue(.5f);m->params[SonavyreEngine::DW_PARAM].setValue(.5f);m->params[SonavyreEngine::INGAIN_PARAM].setValue(.5f);m->params[SonavyreEngine::SRR_PARAM].setValue(1.f);}));
+  menu->addChild(createIndexSubmenuItem("Visual sensitivity",{"Normal","Enhanced (default)","High","Very high"},
+   [=](){float v=m->visualSensitivity;return v<2.f?0:(v<4.f?1:(v<8.f?2:3));},
+   [=](int index){const float levels[]={1.f,2.5f,5.f,10.f};m->visualSensitivity=levels[clamp(index,0,3)];}));
   menu->addChild(createCheckMenuItem("Audio visualisation","",[=](){return m->animate;},[=](){m->animate=!m->animate;}));
   menu->addChild(createMenuItem("Import program-bank WAV...", "",[=](){char* p=osdialog_file(OSDIALOG_OPEN,nullptr,nullptr,nullptr);if(p){m->loadFirmwareFile(p);std::free(p);}}));
  }

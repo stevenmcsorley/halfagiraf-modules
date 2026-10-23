@@ -23,7 +23,7 @@ Click the display to browse/edit. Pro's sidebar opens factory, disk user library
 
 The combination menu enables two additional effects after the main processor, with serial/parallel mode, per-stage program/parameters/wet/dry and combination mix/bypass. The Pro screen's stage boxes toggle the corresponding real stages. Combination state is included in patch and named preset data. Imported-bank programs can be used by these stages.
 
-Both editions retain stereo I/O, three engine CV inputs, wet/dry CV and clock CV. There are no MIDI, auxiliary audio or invented expansion ports. The flowing ribbon and particle field responds to measured output energy; animation can be disabled from the menu. It is an artistic energy visualization rather than a calibrated spectrum. Rack supplies module bypass.
+Both editions retain stereo I/O, three engine CV inputs, wet/dry CV and clock CV. There are no MIDI, auxiliary audio or invented expansion ports. The flowing ribbon and particle field responds to measured output energy; animation can be disabled from the menu. It is an artistic energy visualization rather than a calibrated spectrum. Right-click **Visual sensitivity** offers Normal, Enhanced (default), High and Very high; this setting is saved in the patch and affects only graphics. Rack supplies module bypass.
 
 User library path: `<Rack user directory>/halfagiraf/sonavyre/library.json`. Ten legacy-style preset slots also remain available within each patch. Reset does not erase those user slots or the disk library. Back up user libraries before development testing.
 
