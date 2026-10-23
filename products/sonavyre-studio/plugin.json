@@ -1,0 +1,30 @@
+{
+  "slug": "halfagiraf-sonavyre-studio",
+  "name": "halfagiraf SONAVYRE STUDIO",
+  "version": "2.1.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "halfagiraf",
+  "author": "Steven McSorley",
+  "authorEmail": "smcsorl@googlemail.com",
+  "authorUrl": "https://github.com/stevenmcsorley",
+  "pluginUrl": "https://github.com/stevenmcsorley/halfagiraf-modules",
+  "manualUrl": "https://github.com/stevenmcsorley/halfagiraf-modules#readme",
+  "changelogUrl": "https://github.com/stevenmcsorley/halfagiraf-modules/blob/main/CHANGELOG.md",
+  "sourceUrl": "https://github.com/stevenmcsorley/halfagiraf-modules",
+  "minRackVersion": "2.6.6",
+  "description": "Instruments, processors, and modulation sources for exploratory and ambient patching.",
+  "modules": [
+    {
+      "slug": "SonavyreStudio",
+      "name": "SONAVYRE STUDIO",
+      "description": "Visual Stereo Effects Engine with 64 curated factory effects.",
+      "tags": [
+        "Effect",
+        "Reverb",
+        "Delay",
+        "Chorus",
+        "Visual"
+      ]
+    }
+  ]
+}

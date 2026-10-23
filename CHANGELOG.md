@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.0 — unreleased
+
+- Adds SONAVYRE Free to the existing family plugin, with 12 stereo effects including Black Hole, Cloud, Hall Medium and Plate Classic reverbs.
+- Keeps all five existing module identifiers and implementations.
+- Adds separate SONAVYRE STUDIO packaging with 64 factory programs; SONAVYRE PRO retains its full 246-program bank and combination engine.
+- Adds stable catalogue identities for cross-edition presets and favourites. WAV bank import is removed.
+
 ## 2.1.0 — 14 October 2026
 
 - Adds Grainloom, using the original open-source Beads granular, delay and wavetable DSP.

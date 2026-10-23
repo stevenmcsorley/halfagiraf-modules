@@ -58,7 +58,7 @@ struct SonavyreDisplay : widget::OpaqueWidget {
    const char* cats[]={"Factory","User","Favourites","Reverb","Delay","Modulation","Pitch","Big reverbs"};
    for(int i=0;i<8;i++)label(7,18+i*16,9,i<3 ? gold:dim,cats[i]);
    nvgBeginPath(a.vg);nvgMoveTo(a.vg,89,6);nvgLineTo(a.vg,89,box.size.y-5);nvgStrokeColor(a.vg,nvgRGB(35,61,73));nvgStrokeWidth(a.vg,1);nvgStroke(a.vg);
-   label(101,17,8,gold,module&&module->customBank ? "IMPORTED PROGRAM" : "FACTORY / 246 EFFECTS");
+   label(101,17,8,gold,module&&module->customBank ? "IMPORTED PROGRAM" : string::f("FACTORY / %d EFFECTS",PRO_N));
    label(101,36,14,cyan,module?module->slotNames[p]:"Room Reverb");
    energyField.draw(a.vg,module,101,43,box.size.x-135,45);
    for(int ch=0;ch<2;ch++){
@@ -78,7 +78,7 @@ struct SonavyreDisplay : widget::OpaqueWidget {
    }
    nvgRestore(a.vg);return;
   }
-  label(8,15,9,gold,module && module->customBank ? "IMPORTED BANK" : "FACTORY / 246 EFFECTS");
+  label(8,15,9,gold,module && module->customBank ? "IMPORTED BANK" : string::f("FACTORY / %d EFFECTS",PRO_N));
   label(8,32,16,cyan,module ? module->slotNames[p] : "Room Reverb");
   label(8,45,8,dim,"CLICK TO BROWSE / EDIT PRESETS");
   energyField.draw(a.vg,module,8,47,box.size.x-16,37);
@@ -116,7 +116,7 @@ struct SonavyreWidget : ModuleWidget {
  bool pro;
  SonavyreWidget(SonavyreEngine* m,bool isPro=false):engine(m),pro(isPro){
   setModule(m);
-  setPanel(createPanel(asset::plugin(pluginInstance,pro?"res/sonavyre/panels/SonavyrePro.svg":"res/sonavyre/panels/Sonavyre.svg")));
+  setPanel(createPanel(asset::plugin(pluginInstance,pro?"res/sonavyre/panels/SonavyrePro.svg":(SONAVYRE_EDITION==1?"res/sonavyre/panels/SonavyreStudio.svg":"res/sonavyre/panels/Sonavyre.svg"))));
   float w=pro?142.24f:91.44f;
   for(float x:{2.5f,w-2.5f})for(float y:{2.5f,125.5f})addChild(createWidgetCentered<SonavyreScrew>(mm2px(Vec(x,y))));
   auto d=createWidget<SonavyreDisplay>(mm2px(Vec(6,17)));d->box.size=mm2px(Vec(w-12,pro?45:34));d->module=m;d->studio=pro;
@@ -166,8 +166,20 @@ struct SonavyreWidget : ModuleWidget {
  }
  void recall(json_t* state,const std::string& name){
   if(!json_is_object(state))return;
+#if SONAVYRE_EDITION < 2
+  auto data=json_object_get(state,"data");
+  int selected=json_integer_value(json_object_get(data,"prog"));
+  auto id=json_array_get(json_object_get(data,"factoryIds"),selected<0?0:selected);
+  int global=json_is_integer(id)?json_integer_value(id):selected;
+  bool available=false;
+  for(int i=0;i<PRO_N;i++)if(sonavyreFactoryId(i)==global)available=true;
+  if(json_is_true(json_object_get(data,"customBank"))||!available) {
+   osdialog_message(OSDIALOG_INFO,OSDIALOG_OK,"This preset uses a program outside this edition's factory library. Open it in an edition containing that effect.");
+   return;
+  }
+#endif
   auto target=json_deep_copy(state);
-  // Development editions share state; adapt Rack's product identifiers only.
+  // Restore into the current product; the engine maps stable factory identities.
   json_object_set_new(target,"plugin",json_string(engine->model->plugin->slug.c_str()));
   json_object_set_new(target,"model",json_string(engine->model->slug.c_str()));
   auto h=new history::ModuleChange;h->name="recall SONAVYRE preset";h->moduleId=engine->id;h->oldModuleJ=capture();
@@ -186,7 +198,7 @@ struct SonavyreWidget : ModuleWidget {
   auto search=new SearchField;search->placeholder="Search effects";search->box.size=Vec(240,25);menu->addChild(search);
   for(int p=0;p<engine->nSlots;p++){
    auto name=engine->slotNames[p];std::string lower=name;std::transform(lower.begin(),lower.end(),lower.begin(),[](unsigned char c){return std::tolower(c);});
-   if(category==2&&!library.favourite(p))continue;
+   if(category==2&&!library.favourite(sonavyreFactoryId(p)))continue;
    if(category==3&&lower.find("reverb")==std::string::npos)continue;
    if(category==4&&lower.find("delay")==std::string::npos)continue;
    if(category==5&&lower.find("chorus")==std::string::npos&&lower.find("flanger")==std::string::npos&&lower.find("tremolo")==std::string::npos)continue;
@@ -235,9 +247,9 @@ struct SonavyreWidget : ModuleWidget {
   auto m=engine;
   if(!m) return;
   menu->addChild(new MenuSeparator);
-  menu->addChild(createMenuLabel(pro ? "SONAVYRE PRO / Development" : "SONAVYRE / Development"));
+  menu->addChild(createMenuLabel(SONAVYRE_PRODUCT));
   menu->addChild(createSubmenuItem("Preset library", "",[this](Menu* sm){presetMenu(sm);}));
-  menu->addChild(createCheckMenuItem("Favourite current factory effect","",[=](){return library.favourite(m->prog);},[=](){library.toggleFavourite(m->prog);}));
+  menu->addChild(createCheckMenuItem("Favourite current factory effect","",[=](){return library.favourite(sonavyreFactoryId(m->prog));},[=](){library.toggleFavourite(sonavyreFactoryId(m->prog));}));
   menu->addChild(createSubmenuItem("Effects", "",[this](Menu* sm){effectMenu(sm);}));
   menu->addChild(createSubmenuItem("Big reverbs", "",[this](Menu* sm){effectMenu(sm,7);}));
   menu->addChild(createIndexSubmenuItem("Clock CV routing",{"Sample rate","Parameter 1","Parameter 2","Parameter 3","Program","LFO restart"},[=](){return m->srrRoute;},[=](int v){m->srrRoute=v;}));
@@ -255,7 +267,7 @@ struct SonavyreWidget : ModuleWidget {
     pm->addChild(createMenuItem("Recall", "",[=](){m->recallPreset(i);},!m->presets[i].used));
    }));
   }));
-  menu->addChild(createSubmenuItem("Processing combination", "",[=](Menu* cm){
+  if(SONAVYRE_COMBINATIONS) menu->addChild(createSubmenuItem("Processing combination", "",[=](Menu* cm){
    cm->addChild(createCheckMenuItem("Parallel routing", "",[=](){return m->chain.parallel.load();},[=](){m->chain.parallel.store(!m->chain.parallel.load());}));
    cm->addChild(createCheckMenuItem("Bypass combination", "",[=](){return m->chain.bypass.load();},[=](){m->chain.bypass.store(!m->chain.bypass.load());}));
    cm->addChild(createMenuLabel("Combination mix"));cm->addChild(new AtomicSlider(&m->chain.mix));

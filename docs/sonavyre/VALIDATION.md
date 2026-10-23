@@ -57,3 +57,7 @@ Visual-response tuning: increased quiet-signal sensitivity, waveform detail and 
 ## WAV import removal
 
 Both editions omit WAV bank import and the hidden audio firmware-listen gesture. The unused copied decoder is removed; the original repository remains unchanged. Host regression additionally holds both navigation buttons for 60000 frames, verifies unchanged program/bank and finite audio, then checks normal next-program navigation. Existing custom-bank patch restoration and preset JSON import/export remain supported.
+
+## Edition separation, 23 October 2026
+
+Linux builds succeed for Free (12), Studio (64) and unchanged full PRO (246). All three plugin/module pairs load together in actual Rack Free 2.6.6 using a dedicated QA profile. `screenshots/editions-rack.png` records the real UI. The full VM regression still passes 2248704 stereo frames bit-identically, and the host regression still passes 562176 stereo frames exactly against the original host. Disk preset regression passes. New focused checks pass for every selected Free/Studio binary, finite audio, program navigation, required reverbs, cross-edition catalogue mapping, curated-bank boundaries, disabled compositions and reset. Windows/macOS SONAVYRE builds remain unverified; previous Grainloom platform validation does not establish these new builds.

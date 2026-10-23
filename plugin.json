@@ -1,7 +1,7 @@
 {
   "slug": "halfagiraf",
   "name": "halfagiraf Modules",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "license": "GPL-3.0-or-later",
   "brand": "halfagiraf",
   "author": "Steven McSorley",
@@ -53,7 +53,8 @@
     {
       "slug": "Sonavyre",
       "name": "SONAVYRE",
-      "description": "Visual Stereo Effects Engine. Development build.",
+      "description": "Visual Stereo Effects Engine with 12 factory effects, including four expansive reverbs.",
+      "manualUrl": "https://github.com/stevenmcsorley/halfagiraf-modules/blob/main/docs/sonavyre/README.md",
       "tags": [
         "Effect",
         "Reverb",

@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature/grainloom-beads-port
+      - feature/sonavyre
     tags:
       - "v*"
   pull_request:
@@ -65,6 +66,16 @@ jobs:
         run: make -f grainloom.mk grainloom-test grainloom-display-test
       - name: Build platform package
         run: make -j"$(getconf _NPROCESSORS_ONLN)" RACK_DIR="$PWD/Rack-SDK" dist
+      - name: Compile separate paid editions (excluded from family release)
+        run: |
+          make -C products/sonavyre-studio -j2 RACK_DIR="$PWD/Rack-SDK"
+          make -C products/sonavyre-pro -j2 RACK_DIR="$PWD/Rack-SDK"
+      - name: SONAVYRE DSP and edition regression
+        if: runner.os == 'Linux'
+        run: |
+          git clone https://github.com/stevenmcsorley/halfagiraf-vcv.git ../upstream-halfagiraf-vcv
+          git -C ../upstream-halfagiraf-vcv checkout 1f00b67259779aef2f6a32e060159e992b82bf95
+          RACK_DIR="$PWD/Rack-SDK" tools/test_sonavyre.sh
       - name: Upload package
         uses: actions/upload-artifact@v7
         with:
@@ -85,7 +96,7 @@ jobs:
           msystem: MINGW64
           update: true
           install: >-
-            make tar unzip curl diffutils
+            make tar unzip curl diffutils python
             mingw-w64-x86_64-gcc
             jq
             mingw-w64-x86_64-zstd
@@ -97,6 +108,10 @@ jobs:
         run: make -f grainloom.mk grainloom-test grainloom-display-test
       - name: Build platform package
         run: make -j"$(nproc)" RACK_DIR="$PWD/Rack-SDK" dist
+      - name: Compile separate paid editions (excluded from family release)
+        run: |
+          make -C products/sonavyre-studio -j2 RACK_DIR="$PWD/Rack-SDK"
+          make -C products/sonavyre-pro -j2 RACK_DIR="$PWD/Rack-SDK"
       - name: Upload package
         uses: actions/upload-artifact@v7
         with:

@@ -2,9 +2,19 @@
 #include "../../plugin.hpp"
 #include <atomic>
 #include "../core/FV1.hpp"
+// Edition is fixed by each product translation unit; tests default to the full engine.
+#ifndef SONAVYRE_EDITION
+#define SONAVYRE_EDITION 2
+#endif
+#if SONAVYRE_EDITION == 0
+#include "../presets/FreeBank.hpp"
+#elif SONAVYRE_EDITION == 1
+#include "../presets/StudioBank.hpp"
+#else
 #include "../presets/OriginalBank.hpp"
 #include "../presets/CompleteBank.hpp"
 #include "../presets/CatalogueExtras.hpp"
+#endif
 #include "Composition.hpp"
 #include <string>
 #include <vector>
@@ -12,7 +22,20 @@
 // Shared SONAVYRE host adapted from the original advanced implementation.
 // See docs/sonavyre/AUDIT.md for provenance.
 
-static const int PRO_N = 246; // Eight original slots, complete 200-program bank, 38 catalogue additions.
+static const int PRO_N = SONAVYRE_EDITION == 0 ? 12 : (SONAVYRE_EDITION == 1 ? 64 : 246);
+static const bool SONAVYRE_COMBINATIONS = SONAVYRE_EDITION == 2;
+static const char* SONAVYRE_PRODUCT = SONAVYRE_EDITION == 0 ? "SONAVYRE" : (SONAVYRE_EDITION == 1 ? "SONAVYRE STUDIO" : "SONAVYRE PRO");
+inline int sonavyreFactoryId(int slot) {
+#if SONAVYRE_EDITION < 2
+ return SONAVYRE_FACTORY_IDS[clamp(slot,0,PRO_N-1)];
+#else
+ return clamp(slot,0,PRO_N-1);
+#endif
+}
+inline int sonavyreFactorySlot(int id) {
+ for(int i=0;i<PRO_N;i++) if(sonavyreFactoryId(i)==id)return i;
+ return 0; // An unavailable imported program returns to the first factory effect.
+}
 static const float PRO_CLOCK = 32768.f;        // nominal FV-1 clock (Hz)
 
 struct ProLFO {
@@ -145,6 +168,13 @@ struct SonavyreEngine : Module {
 	}
 
 	void loadDefaultBank() {
+#if SONAVYRE_EDITION < 2
+        for(int p=0;p<PRO_N;p++) {
+            std::memcpy(bank[p],SONAVYRE_EDITION_BANK[p],sizeof(bank[p]));
+            slotNames[p]=SONAVYRE_EDITION_NAMES[p];
+            for(int c=0;c<3;c++)slotLabels[p][c]=SONAVYRE_EDITION_LABELS[p][c];
+        }
+#else
 		for (int p = 0; p < 8; p++) {
 			std::memcpy(bank[p], FXAID_DEFAULT_BANK[p], sizeof(bank[p]));
 			slotNames[p] = FXAID_DEFAULT_NAMES[p];
@@ -161,6 +191,8 @@ struct SonavyreEngine : Module {
 			slotNames[p+208]=SONAVYRE_EXTRA_NAMES[p];
 			for(int c=0;c<3;c++)slotLabels[p+208][c]=SONAVYRE_EXTRA_LABELS[p][c];
 		}
+
+#endif
 		chain.invalidate();
 		nSlots = PRO_N;
 		customBank = false;
@@ -211,6 +243,9 @@ struct SonavyreEngine : Module {
 	json_t* dataToJson() override {
 		json_t* r = json_object();
 		json_object_set_new(r, "chain", chain.toJson());
+        auto ids=json_array();
+        for(int i=0;i<nSlots;i++)json_array_append_new(ids,json_integer(sonavyreFactoryId(i)));
+        json_object_set_new(r,"factoryIds",ids);
 		json_object_set_new(r, "animate", json_boolean(animate));
 		json_object_set_new(r, "visualSensitivity", json_real(visualSensitivity));
 		json_object_set_new(r, "prog", json_integer(prog));
@@ -277,7 +312,34 @@ struct SonavyreEngine : Module {
 		return r;
 	}
 
-	void dataFromJson(json_t* r) override {
+	void dataFromJson(json_t* source) override {
+        // Stable catalogue identities allow presets to move between editions.
+        auto r=json_deep_copy(source);
+        auto ids=json_object_get(r,"factoryIds");
+        bool imported=json_is_true(json_object_get(r,"customBank"));
+        if(!imported) {
+            loadDefaultBank();
+            auto remap=[&](json_t* object) {
+                auto value=json_object_get(object,"prog");
+                if(!json_is_integer(value))return;
+                int old=json_integer_value(value);
+                auto id=json_array_get(ids,old<0?0:old);
+                int global=json_is_integer(id)?json_integer_value(id):old;
+                json_object_set_new(object,"prog",json_integer(sonavyreFactorySlot(global)));
+            };
+            remap(r);
+            auto presetsJ=json_object_get(r,"presets");
+            for(size_t i=0;i<json_array_size(presetsJ);i++)remap(json_array_get(presetsJ,i));
+        }
+#if SONAVYRE_EDITION < 2
+        // Preset JSON cannot install arbitrary program binaries in curated editions.
+        json_object_del(r,"customBank");
+        json_object_del(r,"bank");
+        json_object_del(r,"chain");
+        loadDefaultBank();
+        chain.bypass.store(true);
+        for(auto& stage:chain.stages)stage.enabled.store(false);
+#endif
 		json_t* j;
 		chain.fromJson(json_object_get(r, "chain"));
 		if ((j = json_object_get(r, "animate"))) animate = json_is_true(j);
@@ -349,6 +411,7 @@ struct SonavyreEngine : Module {
 			params[PROG_PARAM].setValue(prog);
 			lastProgKnob = prog;
 		}
+        json_decref(r);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -436,7 +499,7 @@ struct SonavyreEngine : Module {
 
 		float outL = (inL * (1.f - dw) + wetL * dw) * 5.f;
 		float outR = (inR * (1.f - dw) + wetR * dw) * 5.f;
-		chain.process(outL, outR, dt, bank, nSlots, clockHz);
+		if (SONAVYRE_COMBINATIONS) chain.process(outL, outR, dt, bank, nSlots, clockHz);
 		outputs[L_OUTPUT].setVoltage(outL);
 		outputs[R_OUTPUT].setVoltage(outR);
 		analysisPowerSum += (outL*outL + outR*outR) * .005f;
