@@ -38,6 +38,16 @@ Learns the relationships between four trigger streams, then uses that memory to 
 
 Granular textures, frozen loops and wavetable voices, using Emilie Gillet's Beads DSP.
 
+### [SONAVYRE Free](docs/Sonavyre.md)
+
+<p align="center"><img src="docs/Sonavyre.png" width="270" alt="SONAVYRE Free in VCV Rack"/></p>
+
+A visual stereo effects engine with 12 factory effects, from spacious Black Hole, Cloud and Hall reverbs to plate reverb, stereo and ping-pong delays, chorus, flanger, tremolo and pitch shifting.
+
+Three controls adapt to the selected effect. Shape the sound with stereo input gain, wet/dry mix, variable engine clock, CV modulation and three internal LFOs. Save your own presets, favourite factory effects and watch the display respond to the audio.
+
+Included in the upcoming **2.2.0** family update.
+
 ## Install
 
 Download the package for Windows x64, Linux x64, macOS Intel or Apple Silicon from
@@ -46,7 +56,7 @@ Requires Rack 2.6.6 or newer.
 
 Close Rack, open its user folder and copy the `.vcvplugin` into the matching
 `plugins-win-x64`, `plugins-lin-x64`, `plugins-mac-x64` or
-`plugins-mac-arm64` directory. Start Rack again and search for **Grainloom**.
+`plugins-mac-arm64` directory. Start Rack again and search for the module by name.
 
 [Grainloom manual](docs/Grainloom.md) · [Example patch](docs/patches/Grainloom-demo.vcv)
 
