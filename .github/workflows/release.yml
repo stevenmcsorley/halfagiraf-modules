@@ -66,10 +66,10 @@ jobs:
         run: make -f grainloom.mk grainloom-test grainloom-display-test
       - name: Build platform package
         run: make -j"$(getconf _NPROCESSORS_ONLN)" RACK_DIR="$PWD/Rack-SDK" dist
-      - name: Compile separate paid editions (excluded from family release)
+      - name: Package separate paid editions (excluded from family release)
         run: |
-          make -C products/sonavyre-studio -j2 RACK_DIR="$PWD/Rack-SDK"
-          make -C products/sonavyre-pro -j2 RACK_DIR="$PWD/Rack-SDK"
+          make -C products/sonavyre-studio -j2 RACK_DIR="$PWD/Rack-SDK" dist
+          make -C products/sonavyre-pro -j2 RACK_DIR="$PWD/Rack-SDK" dist
       - name: SONAVYRE DSP and edition regression
         if: runner.os == 'Linux'
         run: |
@@ -81,6 +81,13 @@ jobs:
         with:
           name: ${{ matrix.platform }}
           path: dist/*.vcvplugin
+          if-no-files-found: error
+
+      - name: Upload paid-edition test packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: sonavyre-paid-${{ matrix.platform }}
+          path: products/sonavyre-*/dist/*.vcvplugin
           if-no-files-found: error
 
   build-windows:
@@ -108,15 +115,22 @@ jobs:
         run: make -f grainloom.mk grainloom-test grainloom-display-test
       - name: Build platform package
         run: make -j"$(nproc)" RACK_DIR="$PWD/Rack-SDK" dist
-      - name: Compile separate paid editions (excluded from family release)
+      - name: Package separate paid editions (excluded from family release)
         run: |
-          make -C products/sonavyre-studio -j2 RACK_DIR="$PWD/Rack-SDK"
-          make -C products/sonavyre-pro -j2 RACK_DIR="$PWD/Rack-SDK"
+          make -C products/sonavyre-studio -j2 RACK_DIR="$PWD/Rack-SDK" dist
+          make -C products/sonavyre-pro -j2 RACK_DIR="$PWD/Rack-SDK" dist
       - name: Upload package
         uses: actions/upload-artifact@v7
         with:
           name: win-x64
           path: dist/*.vcvplugin
+          if-no-files-found: error
+
+      - name: Upload paid-edition test packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: sonavyre-paid-win-x64
+          path: products/sonavyre-*/dist/*.vcvplugin
           if-no-files-found: error
 
   release:
@@ -135,7 +149,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mapfile -t packages < <(find artifacts -type f -name '*.vcvplugin' -print | sort)
+          mapfile -t packages < <(find artifacts -type f -name 'halfagiraf-*.vcvplugin' ! -name 'halfagiraf-sonavyre-*' -print | sort)
           test "${#packages[@]}" -eq 4
           gh release create "$GITHUB_REF_NAME" "${packages[@]}" \
             --repo "$GITHUB_REPOSITORY" \

@@ -66,3 +66,9 @@ This checkpoint is not the requested completed production product.
 8. Test all original modulation/routing variants, preset JSON import files, patch restart through Rack, named-library GUI workflows, sustained audio/CPU use and realtime sanitizer/stress scenarios.
 9. Run actual Windows and macOS builds and Rack loading. Only Linux x64 is built here. Use the SDK Makefile path on each platform; do not claim cross-platform validation from portable-looking C++.
 10. The owner has now requested edition separation: Free 12, Studio 64, Pro 246. Linux candidate packages are produced locally; cross-platform and release clearance remain outstanding. All remain GPL-3.0-or-later; paid distribution is a price distinction, not a claim of proprietary licensing.
+
+## Owner clarification — 23 October 2026
+
+The owner reports that the original hardware developer has explicitly agreed to these emulations being coded and released, and requests no personal or hardware-brand endorsement/mention in release announcements because of the separate hardware business. Product branding and release marketing will use halfagiraf and SONAVYRE only. Required copyright/licence notices remain in legal documentation; no endorsement is implied. This records the owner's account, not an independently reviewed agreement.
+
+The absent original assembly generator remains a provenance question, not a demonstrated build defect. It does not prevent compiling or validating the supplied program binaries. Multiplatform SDK builds proceed against the current sources; any final source-distribution review must distinguish actual missing redistribution obligations from unverified assumptions.
