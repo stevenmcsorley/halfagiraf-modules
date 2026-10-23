@@ -70,12 +70,10 @@ jobs:
         run: |
           make -C products/sonavyre-studio -j2 RACK_DIR="$PWD/Rack-SDK" dist
           make -C products/sonavyre-pro -j2 RACK_DIR="$PWD/Rack-SDK" dist
-      - name: SONAVYRE DSP and edition regression
+      - name: SONAVYRE preset and edition regression
         if: runner.os == 'Linux'
         run: |
-          git clone https://github.com/stevenmcsorley/halfagiraf-vcv.git ../upstream-halfagiraf-vcv
-          git -C ../upstream-halfagiraf-vcv checkout 1f00b67259779aef2f6a32e060159e992b82bf95
-          RACK_DIR="$PWD/Rack-SDK" tools/test_sonavyre.sh
+          RACK_DIR="$PWD/Rack-SDK" tools/test_sonavyre.sh --self-contained
       - name: Upload package
         uses: actions/upload-artifact@v7
         with:

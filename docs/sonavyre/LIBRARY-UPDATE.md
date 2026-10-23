@@ -20,7 +20,7 @@ SONAVYRE STUDIO and SONAVYRE PRO are separate paid-plugin packages and are exclu
 
 - Review the actual release commit and obtain final owner publication approval, as requested in the original brief.
 - Complete SONAVYRE-specific Windows x64, macOS Intel/Apple Silicon compilation and loading validation. The existing workflow builds the family on all four platforms; Grainloom's earlier successful runs do not validate SONAVYRE.
-- Close the outstanding corresponding-source issue for the eight original assembled programs (`gen_fxaid_bank.py` / preferred-form SpinASM sources are absent from the supplied source tree). Program-bundling permission has already been confirmed by the owner; this is a separate source-compliance question.
+- Keep the family GPL-3.0-or-later licence and required legal notices. The owner has confirmed permission to develop and release the products, with no hardware affiliation or endorsement. Keep hardware/personal names out of release marketing. The absent assembly generator is an inventory note, not an established release prohibition.
 - Resolve the realtime/state/preset release blockers recorded in AUDIT.md. Current local packages are test candidates, not a production-readiness declaration.
 - Push the reviewed commit, then post its full hash and version to the existing issue. Do not post a branch name as the release reference.
 
